@@ -4,6 +4,12 @@ dist/
 web-build/
 *.log
 .DS_Store
-.env.local
+
+# User-created environment files (keep .env.example tracked)
+.env
+.env.*
+!.env.example
+
+# Native build output
 ios/
 android/

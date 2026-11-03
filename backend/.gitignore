@@ -1,0 +1,17 @@
+# Dependencies
+node_modules/
+
+# Environment and secrets
+.env
+.env.*
+!.env.example
+
+# Runtime and generated files
+*.log
+coverage/
+uploads/
+tmp/
+
+# OS files
+.DS_Store
+Thumbs.db

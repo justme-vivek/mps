@@ -46,7 +46,10 @@ EXPO_PUBLIC_API_URL=http://<your-lan-ip>:5000/api
 
 (On a real device, use your machine's LAN IP instead of `localhost`.)
 
-If `mobile/.env` doesn't exist, the app falls back to `http://localhost:5000/api`.
+Start by copying [`mobile/.env.example`](mobile/.env.example) to `mobile/.env`.
+The backend uses the same pattern: copy [`backend/.env.example`](backend/.env.example)
+to `backend/.env` and fill in the required credentials. Both `.env` files are
+ignored by Git; only the safe `.env.example` templates are tracked.
 
 ## Root scripts
 

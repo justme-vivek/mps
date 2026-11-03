@@ -4,6 +4,42 @@ Custom Node.js API for the MPS mobile app (Expo/React Native).
 
 Stack: **Express 5 · MongoDB (Mongoose 9) · JWT · ImageKit · Multer**
 
+## Project structure
+
+```text
+backend/
+├── config/                  # database, environment, ImageKit, and mailer setup
+├── controllers/             # authentication and content request handlers
+├── middleware/              # auth guards and upload validation
+├── models/                  # Mongoose schemas
+├── routes/                  # API route definitions
+├── scripts/                 # development-only utilities such as seedAdmin.js
+├── utils/                   # media and OTP helpers
+├── server.js                # Express application entry point
+├── package.json
+├── package-lock.json
+├── .env.example             # safe template; copy to .env and fill in locally
+└── .gitignore               # dependencies, secrets, logs, and generated files
+```
+
+Create these local, git-ignored files before running the apps:
+
+- `backend/.env` — copy from [`backend/.env.example`](.env.example) and set
+  MongoDB, JWT, ImageKit, admin seed, and optional SMTP values.
+- `mobile/.env` — copy from [`mobile/.env.example`](../mobile/.env.example) and
+  set `EXPO_PUBLIC_API_URL` to the backend URL. Use your computer's LAN IP on a
+  physical device.
+
+The following user-created/generated paths are also ignored: `node_modules/`,
+Expo/native build output, `*.log`, backend `coverage/`, `uploads/`, and `tmp/`.
+Never commit real credentials or replace the tracked example files with secrets.
+
+The Expo client lives in [`../mobile`](../mobile), with its routes in
+[`../mobile/app`](../mobile/app) and reusable JavaScript/JSX code in
+[`../mobile/src`](../mobile/src). Its package-specific ignore rules are in
+[`../mobile/.gitignore`](../mobile/.gitignore); the repository-wide rules are in
+[`../.gitignore`](../.gitignore).
+
 ## Setup
 
 ```bash
@@ -136,4 +172,3 @@ sends/hour per email+purpose. Resetting/changing the password sets
 - Rate limiting: strict on `/api/auth`, light on other `/api` routes
 - CORS allowlist (`CORS_ORIGINS`); native apps (no Origin header) always allowed
 - zod validation on auth bodies; consistent central error handler
-
