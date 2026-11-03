@@ -1,0 +1,19 @@
+# Dependencies
+node_modules/
+
+# Environment & secrets
+.env
+.env.local
+.env.*.local
+
+# Build / cache artifacts
+.vite/
+.expo/
+dist/
+web-build/
+*.log
+stats.html
+
+# OS files
+.DS_Store
+Thumbs.db

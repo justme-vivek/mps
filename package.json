@@ -1,0 +1,15 @@
+{
+  "name": "mps",
+  "version": "1.0.0",
+  "private": true,
+  "description": "MPS (Modern Public School) — Expo React Native app + Express/MongoDB/ImageKit backend",
+  "scripts": {
+    "backend": "npm run dev --prefix backend",
+    "backend:start": "npm start --prefix backend",
+    "app": "npm start --prefix mobile",
+    "app:android": "npm run android --prefix mobile",
+    "app:ios": "npm run ios --prefix mobile",
+    "seed:admin": "npm run seed:admin --prefix backend",
+    "install:all": "npm install --prefix backend && npm install --prefix mobile"
+  }
+}
