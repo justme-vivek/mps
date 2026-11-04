@@ -103,6 +103,7 @@ export default function Login() {
                     value={value}
                     onChangeText={onChange}
                     error={error?.message}
+                    returnKeyType="next"
                   />
                 )}
               />
@@ -110,7 +111,16 @@ export default function Login() {
                 control={loginForm.control}
                 name="password"
                 render={({ field: { onChange, value }, fieldState: { error } }) => (
-                  <Input label="Password" placeholder="••••••••" secure value={value} onChangeText={onChange} error={error?.message} />
+                  <Input
+                    label="Password"
+                    placeholder="••••••••"
+                    secure
+                    value={value}
+                    onChangeText={onChange}
+                    error={error?.message}
+                    returnKeyType="go"
+                    onSubmitEditing={loginForm.handleSubmit(onLogin)}
+                  />
                 )}
               />
               <Pressable onPress={() => router.push('/forgot-password')} accessibilityRole="link" className="mb-3 min-h-[44px] justify-center self-end">
@@ -153,6 +163,8 @@ export default function Login() {
                       value={value}
                       onChangeText={onChange}
                       error={error?.message}
+                      returnKeyType="go"
+                      onSubmitEditing={registerForm.handleSubmit(onRegister)}
                     />
                   )}
                 />

@@ -103,6 +103,9 @@ export default function NewPassword() {
               value={value}
               onChangeText={onChange}
               error={error?.message}
+            
+              returnKeyType="go"
+              onSubmitEditing={handleSubmit(onSubmit)}
             />
           )}
         />

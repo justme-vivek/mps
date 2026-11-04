@@ -77,7 +77,10 @@ export default function ForgotPassword() {
                 value={value}
                 onChangeText={onChange}
                 error={error?.message}
-              />
+              
+              returnKeyType="go"
+              onSubmitEditing={handleSubmit(onSubmit)}
+            />
             )}
           />
           <Button title="Send Code" size="lg" loading={isSubmitting} onPress={handleSubmit(onSubmit)} />

@@ -105,7 +105,10 @@ export default function ChangePassword() {
                 value={value}
                 onChangeText={onChange}
                 error={error?.message}
-              />
+              
+              returnKeyType="go"
+              onSubmitEditing={handleSubmit(onSubmit)}
+            />
             )}
           />
           <Button title="Continue" size="lg" className="mt-2" loading={isSubmitting} onPress={handleSubmit(onSubmit)} />
