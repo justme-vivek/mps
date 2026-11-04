@@ -9,6 +9,7 @@ import PageTitle from '../../src/components/ui/PageTitle';
 import Chip from '../../src/components/ui/Chip';
 import Skeleton from '../../src/components/ui/Skeleton';
 import EmptyState from '../../src/components/ui/EmptyState';
+import DataBoundary from '../../src/components/feedback/DataBoundary';
 import PhotoCard from '../../src/components/common/PhotoCard';
 import ContentActions from '../../src/components/common/ContentActions';
 import { useGallery } from '../../src/features/gallery/galleryService';
@@ -21,7 +22,8 @@ const GAP = 12;
 export default function GalleryScreen() {
   const insets = useSafeAreaInsets();
   const { width, columns, gutter } = useBreakpoint();
-  const { data: photos = [], isLoading, refetch, isRefetching } = useGallery();
+  const gallery = useGallery();
+  const { data: photos = [], refetch, isRefetching } = gallery;
   const [category, setCategory] = useState('All');
   const [viewer, setViewer] = useState(null);
 
@@ -41,31 +43,39 @@ export default function GalleryScreen() {
     <Screen bottomTabBar refresh={{ refreshing: isRefetching, onRefresh: refetch }}>
       <PageTitle title="Gallery" subtitle="Moments from school life" />
 
-      <View className="mb-4 flex-row flex-wrap" style={{ gap: 8 }}>
+      <View className="mb-4 flex-row flex-wrap" style={{ gap: 8, display: categories.length > 2 ? 'flex' : 'none' }}>
         {categories.map((c) => (
           <Chip key={c} label={c} selected={category === c} onPress={() => setCategory(c)} />
         ))}
       </View>
 
-      {isLoading ? (
-        <View className="flex-row flex-wrap" style={{ gap: GAP }}>
-          {Array.from({ length: columns * 2 }).map((_, i) => (
-            <Skeleton key={i} style={{ width: size, height: size, borderRadius: 18 }} />
-          ))}
-        </View>
-      ) : filtered.length ? (
-        <View className="flex-row flex-wrap" style={{ gap: GAP }}>
-          {filtered.map((item) => (
-            <PhotoCard key={item._id} photo={item} size={size} onPress={() => setViewer(item)} />
-          ))}
-        </View>
-      ) : (
-        <EmptyState
-          icon={<CameraOff size={32} color={colors.inkFaint} />}
-          title="No photos yet"
-          message="Moments from school life will appear here."
-        />
-      )}
+      <DataBoundary
+        query={gallery}
+        skeleton={
+          <View className="flex-row flex-wrap" style={{ gap: GAP }}>
+            {Array.from({ length: columns * 2 }).map((_, i) => (
+              <Skeleton key={i} style={{ width: size, height: size, borderRadius: 18 }} />
+            ))}
+          </View>
+        }
+        empty={{
+          icon: <CameraOff size={32} color={colors.inkFaint} />,
+          title: 'No photos yet',
+          message: 'Moments from school life will appear here.',
+        }}
+      >
+        {() =>
+          filtered.length ? (
+            <View className="flex-row flex-wrap" style={{ gap: GAP }}>
+              {filtered.map((item) => (
+                <PhotoCard key={item._id} photo={item} size={size} onPress={() => setViewer(item)} />
+              ))}
+            </View>
+          ) : (
+            <EmptyState title="Nothing in this category" message="Try another category." />
+          )
+        }
+      </DataBoundary>
 
       {/* Full-screen photo viewer */}
       <Modal visible={!!viewer} animationType="fade" transparent onRequestClose={() => setViewer(null)}>

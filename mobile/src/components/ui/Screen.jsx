@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useRef } from 'react';
 import { RefreshControl, ScrollView, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useBreakpoint } from '../../hooks/useBreakpoint';
@@ -14,11 +14,13 @@ export default function Screen({
   scroll = true,
   padded = true,
   refresh = null, // { refreshing, onRefresh }
+  onEndReached = null, // lazy loading: called near the bottom (must be idempotent)
   bottomTabBar = false,
   className = '',
   maxWidth = layout.maxContentWidth,
 }) {
   const insets = useSafeAreaInsets();
+  const viewport = useRef(0);
   const { isWide, gutter } = useBreakpoint();
 
   const horizontal = padded ? gutter : 0;
@@ -40,6 +42,19 @@ export default function Screen({
       showsVerticalScrollIndicator={false}
       keyboardShouldPersistTaps="handled"
       contentContainerStyle={{ flexGrow: 1 }}
+      scrollEventThrottle={100}
+      onLayout={(e) => {
+        viewport.current = e.nativeEvent.layout.height;
+      }}
+      onScroll={
+        onEndReached
+          ? ({ nativeEvent: { contentOffset, layoutMeasurement, contentSize } }) => {
+              if (contentOffset.y + layoutMeasurement.height >= contentSize.height - 480) onEndReached();
+            }
+          : undefined
+      }
+      // Tall screens may not scroll at all: keep loading until the page is filled.
+      onContentSizeChange={onEndReached ? (_, h) => h <= viewport.current + 120 && onEndReached() : undefined}
       refreshControl={
         refresh ? (
           <RefreshControl refreshing={refresh.refreshing} onRefresh={refresh.onRefresh} tintColor={colors.pen} />

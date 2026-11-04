@@ -11,9 +11,11 @@ import Skeleton from '../../src/components/ui/Skeleton';
 import SectionHeader from '../../src/components/ui/SectionHeader';
 import { NoticeCard, EventCard } from '../../src/components/common/ContentCards';
 import { useAuth } from '../../src/features/auth/AuthContext';
+import DataBoundary from '../../src/components/feedback/DataBoundary';
+import { DiaryRowSkeleton, HeroSkeleton } from '../../src/components/feedback/skeletons';
 import { useBanners } from '../../src/features/banners/bannerService';
-import { useNotices } from '../../src/features/notices/noticeService';
-import { useEvents } from '../../src/features/events/eventService';
+import { useLatestNotices } from '../../src/features/notices/noticeService';
+import { useLatestEvents } from '../../src/features/events/eventService';
 import { useBreakpoint } from '../../src/hooks/useBreakpoint';
 import { colors } from '../../src/theme/tokens';
 import { ik } from '../../src/utils/ik';
@@ -115,16 +117,6 @@ function QuickActions({ router }) {
   );
 }
 
-function RowSkeletons({ count }) {
-  return (
-    <View style={{ gap: 8 }}>
-      {Array.from({ length: count }).map((_, i) => (
-        <Skeleton key={i} className="h-[68px] w-full" />
-      ))}
-    </View>
-  );
-}
-
 function SideLink({ icon: Icon, title, text, route, router }) {
   return (
     <Card onPress={() => router.push(route)} className="mb-3 border-primary-100 bg-primary-50">
@@ -146,8 +138,8 @@ export default function UserHome() {
   const { user } = useAuth();
   const { isMedium, isWide } = useBreakpoint();
   const banners = useBanners();
-  const notices = useNotices();
-  const events = useEvents();
+  const notices = useLatestNotices(isWide ? 5 : 3);
+  const events = useLatestEvents(20);
 
   const hero = (banners.data || []).find((b) => b.isActive) || null;
   const latestNotices = (notices.data || []).filter((n) => n.status !== 'draft').slice(0, isWide ? 5 : 3);
@@ -169,34 +161,44 @@ export default function UserHome() {
   const noticeBoard = (
     <View className="mb-6">
       <SectionHeader title="Notice board" actionLabel="See all" onAction={() => router.push('/notices')} />
-      {notices.isLoading ? (
-        <RowSkeletons count={3} />
-      ) : latestNotices.length ? (
-        latestNotices.map((n, i) => (
-          <NoticeCard key={n._id} notice={n} first={i === 0} onPress={() => router.push(`/notices/${n._id}`)} />
-        ))
-      ) : (
-        <Card className="items-center py-6">
-          <Text className="text-[15px] text-ink-muted">No notices right now.</Text>
-        </Card>
-      )}
+      <DataBoundary
+        query={notices}
+        skeleton={<DiaryRowSkeleton count={3} />}
+        isEmpty={() => latestNotices.length === 0}
+        empty={
+          <Card className="items-center py-6">
+            <Text className="text-[15px] text-ink-muted">No notices right now.</Text>
+          </Card>
+        }
+      >
+        {() =>
+          latestNotices.map((n, i) => (
+            <NoticeCard key={n._id} notice={n} first={i === 0} onPress={() => router.push(`/notices/${n._id}`)} />
+          ))
+        }
+      </DataBoundary>
     </View>
   );
 
   const comingUp = (
     <View className="mb-6">
       <SectionHeader title="Coming up" actionLabel="See all" onAction={() => router.push('/events')} />
-      {events.isLoading ? (
-        <RowSkeletons count={2} />
-      ) : upcoming.length ? (
-        upcoming.map((e, i) => (
-          <EventCard key={e._id} event={e} first={i === 0} onPress={() => router.push(`/events/${e._id}`)} />
-        ))
-      ) : (
-        <Card className="items-center py-6">
-          <Text className="text-[15px] text-ink-muted">No upcoming events scheduled.</Text>
-        </Card>
-      )}
+      <DataBoundary
+        query={events}
+        skeleton={<DiaryRowSkeleton count={2} />}
+        isEmpty={() => upcoming.length === 0}
+        empty={
+          <Card className="items-center py-6">
+            <Text className="text-[15px] text-ink-muted">No upcoming events scheduled.</Text>
+          </Card>
+        }
+      >
+        {() =>
+          upcoming.map((e, i) => (
+            <EventCard key={e._id} event={e} first={i === 0} onPress={() => router.push(`/events/${e._id}`)} />
+          ))
+        }
+      </DataBoundary>
     </View>
   );
 
@@ -210,7 +212,7 @@ export default function UserHome() {
   if (isWide) {
     return (
       <Screen refresh={refresh} bottomTabBar>
-        {hero ? <HeroCard banner={hero} loading={false} tall /> : null}
+        {hero ? <HeroCard banner={hero} loading={false} tall /> : banners.isLoading ? <HeroSkeleton height={280} /> : null}
         <View className="mb-4 flex-row items-center" style={{ gap: 40 }}>
           <View className="flex-1" style={{ gap: 18 }}>
             <View className="self-start rounded-md bg-accent px-3 py-1">

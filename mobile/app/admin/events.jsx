@@ -1,17 +1,16 @@
 import React, { useState } from 'react';
-import { FlatList } from 'react-native';
 import Text from '../../src/components/ui/Text';
 import Screen from '../../src/components/ui/Screen';
-import Skeleton from '../../src/components/ui/Skeleton';
 import EmptyState from '../../src/components/ui/EmptyState';
 import ConfirmDialog from '../../src/components/ui/ConfirmDialog';
 import Input from '../../src/components/ui/Input';
+import AdminList from '../../src/components/admin/AdminList';
 import EntityCard from '../../src/components/admin/EntityCard';
 import AdminAddFab from '../../src/components/admin/AdminAddFab';
 import FormModal from '../../src/components/admin/FormModal';
 import { Field } from '../../src/components/admin/Field';
 import ImagePickerField from '../../src/components/admin/ImagePickerField';
-import { useEvents, eventService } from '../../src/features/events/eventService';
+import { useEventsInfinite, eventService } from '../../src/features/events/eventService';
 import { useEntityMutations } from '../../src/hooks/useEntityMutations';
 import { useToast } from '../../src/components/ui/Toast';
 import { toDateInput } from '../../src/utils/format';
@@ -25,7 +24,8 @@ const EMPTY = {
 };
 
 export default function AdminEvents() {
-  const { data: events = [], isLoading } = useEvents();
+  const list = useEventsInfinite();
+  const events = list.data || [];
   const { create, update, remove } = useEntityMutations({
     service: eventService,
     keys: eventService.keys,
@@ -77,12 +77,9 @@ export default function AdminEvents() {
 
   return (
     <Screen scroll={false} maxWidth={960}>
-      <FlatList
-        style={{ flex: 1 }}
-        data={events || []}
-        keyExtractor={(item) => item._id}
-        contentContainerStyle={{ paddingBottom: 120 }}
-        showsVerticalScrollIndicator={false}
+      <AdminList
+        list={list}
+        thumb
         renderItem={({ item }) => (
           <EntityCard
             title={item.title}
@@ -93,13 +90,7 @@ export default function AdminEvents() {
             onDelete={() => setDeleting(item)}
           />
         )}
-        ListEmptyComponent={
-          isLoading ? (
-            <Skeleton className="h-24 w-full" />
-          ) : (
-            <EmptyState title="No events yet" message="Tap + to schedule your first event." />
-          )
-        }
+        empty={<EmptyState title="No events yet" message="Tap + to schedule your first event." />}
       />
 
       <AdminAddFab label="New event" onPress={openCreate} />

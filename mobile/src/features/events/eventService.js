@@ -1,5 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { api, buildUploadPayload } from '../../services/api';
+import { useInfiniteList } from '../../hooks/useInfiniteList';
 
 const keys = {
   all: ['events'],
@@ -23,4 +24,16 @@ export function useEvents() {
 
 export function useEvent(id) {
   return useQuery({ queryKey: keys.detail(id), queryFn: () => fetchById(id), enabled: !!id });
+}
+
+/** Most recent events for the home screen; caller filters for upcoming. */
+export function useLatestEvents(limit = 20) {
+  return useQuery({
+    queryKey: [...keys.all, 'latest', limit],
+    queryFn: async () => (await api.get('/events', { params: { limit, page: 1 } })).data,
+  });
+}
+
+export function useEventsInfinite() {
+  return useInfiniteList({ key: keys.all, path: '/events' });
 }

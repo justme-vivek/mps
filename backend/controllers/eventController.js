@@ -1,4 +1,5 @@
 const Event = require('../models/Event');
+const { findPaged } = require('../utils/paginate');
 const { uploadToImagekit, deleteFromImagekit } = require('../utils/media');
 
 // @desc    Fetch all events
@@ -6,7 +7,7 @@ const { uploadToImagekit, deleteFromImagekit } = require('../utils/media');
 // @access  Public
 const getEvents = async (req, res) => {
   try {
-    const events = await Event.find({}).sort({ date: -1 });
+    const events = await findPaged(Event, {}, { date: -1, _id: -1 }, req, res);
     res.json(events);
   } catch (error) {
     res.status(500).json({ message: 'Server Error', error: error.message });

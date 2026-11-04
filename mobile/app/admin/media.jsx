@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { FlatList, Pressable, View } from 'react-native';
+import { Pressable, View } from 'react-native';
 import Text from '../../src/components/ui/Text';
 import { FileText, Trash2, Upload } from 'lucide-react-native';
 import { Image } from 'expo-image';
@@ -8,11 +8,12 @@ import PageTitle from '../../src/components/ui/PageTitle';
 import Chip from '../../src/components/ui/Chip';
 import { colors } from '../../src/theme/tokens';
 import { useBreakpoint } from '../../src/hooks/useBreakpoint';
-import Skeleton from '../../src/components/ui/Skeleton';
+import AdminList from '../../src/components/admin/AdminList';
+import { GridSkeleton } from '../../src/components/feedback/skeletons';
 import EmptyState from '../../src/components/ui/EmptyState';
 import ConfirmDialog from '../../src/components/ui/ConfirmDialog';
 import Badge from '../../src/components/ui/Badge';
-import { useMediaAssets, useMediaMutations } from '../../src/features/media/mediaService';
+import { useMediaInfinite, useMediaMutations } from '../../src/features/media/mediaService';
 import { pickImage, pickPdf } from '../../src/utils/pickers';
 import { apiErrorMessage } from '../../src/services/api';
 import { useToast } from '../../src/components/ui/Toast';
@@ -29,7 +30,7 @@ export default function AdminMedia() {
   const toast = useToast();
   const { isWide, isMedium } = useBreakpoint();
   const [type, setType] = useState(undefined);
-  const { data: assets = [], isLoading } = useMediaAssets(type);
+  const list = useMediaInfinite(type);
   const { upload, remove } = useMediaMutations();
   const [uploading, setUploading] = useState(false);
   const [deleting, setDeleting] = useState(null);
@@ -83,24 +84,14 @@ export default function AdminMedia() {
         </Pressable>
       </View>
 
-      {isLoading ? (
-        <View className="flex-row flex-wrap" style={{ gap: 10 }}>
-          {[0, 1, 2, 3, 4, 5].map((i) => (
-            <Skeleton key={i} className="h-28" style={{ width: 104 }} />
-          ))}
-        </View>
-      ) : (
-        <FlatList
-          key={cols}
-          data={assets || []}
-          keyExtractor={(item) => item._id}
-          numColumns={cols}
-          style={{ flex: 1 }}
-          columnWrapperStyle={{ gap: 10, marginBottom: 10 }}
-          contentContainerStyle={{ paddingBottom: 120 }}
-          showsVerticalScrollIndicator={false}
-          renderItem={({ item }) => (
-            <View className="flex-1 overflow-hidden rounded-2xl border-[1.5px] border-line bg-surface">
+      <AdminList
+        key={cols}
+        list={list}
+        numColumns={cols}
+        columnWrapperStyle={{ gap: 10, marginBottom: 10 }}
+        skeleton={<GridSkeleton count={cols * 2} columns={cols} aspect={1.1} />}
+        renderItem={({ item }) => (
+            <View className="flex-1 overflow-hidden rounded-2xl border-[1.5px] border-line bg-surface" style={{ maxWidth: `${100 / cols - 1}%` }}>
               <View className="h-24 bg-surface-alt">
                 {item.type === 'image' ? (
                   <Image
@@ -135,15 +126,12 @@ export default function AdminMedia() {
                 <Text className="ml-1 text-[13px] font-bold text-danger">Delete</Text>
               </Pressable>
             </View>
-          )}
-          ListEmptyComponent={
-            <EmptyState
+        )}
+        empty={<EmptyState
               title="Media library is empty"
               message="Upload images and PDFs here — every upload is stored in ImageKit."
-            />
-          }
-        />
-      )}
+            />}
+      />
 
       <ConfirmDialog
         visible={!!deleting}

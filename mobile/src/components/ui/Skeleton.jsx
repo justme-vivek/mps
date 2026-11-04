@@ -1,5 +1,5 @@
-import React, { useEffect, useRef } from 'react';
-import { Animated, Platform, View } from 'react-native';
+import React, { useEffect, useRef, useState } from 'react';
+import { Animated, Easing, Platform, View } from 'react-native';
 import { cssInterop } from 'nativewind';
 
 // Animated components are not NativeWind-aware by default; register once so
@@ -7,28 +7,51 @@ import { cssInterop } from 'nativewind';
 const AnimatedView = Animated.createAnimatedComponent(View);
 cssInterop(AnimatedView, { className: 'style' });
 
-/** Pulsing placeholder block. */
+/**
+ * Placeholder block with a soft light sweep ("shimmer") — the same loading
+ * language video/feed apps use. Compose it into screen-shaped skeletons.
+ */
 export default function Skeleton({ className = '', style }) {
-  const opacity = useRef(new Animated.Value(0.5)).current;
+  const [width, setWidth] = useState(0);
+  const sweep = useRef(new Animated.Value(0)).current;
 
   useEffect(() => {
-    const useNativeDriver = Platform.OS !== 'web';
     const loop = Animated.loop(
-      Animated.sequence([
-        Animated.timing(opacity, { toValue: 1, duration: 800, useNativeDriver }),
-        Animated.timing(opacity, { toValue: 0.5, duration: 800, useNativeDriver }),
-      ])
+      Animated.timing(sweep, {
+        toValue: 1,
+        duration: 1300,
+        easing: Easing.inOut(Easing.quad),
+        useNativeDriver: Platform.OS !== 'web',
+      })
     );
     loop.start();
     return () => loop.stop();
-  }, [opacity]);
+  }, [sweep]);
+
+  const bar = Math.max(width * 0.6, 80);
+  const translateX = sweep.interpolate({ inputRange: [0, 1], outputRange: [-bar, width + bar] });
 
   return (
-    <AnimatedView
+    <View
       accessibilityElementsHidden
       importantForAccessibility="no-hide-descendants"
-      className={`rounded-xl bg-surface-sunken ${className}`}
-      style={[{ opacity }, style]}
-    />
+      onLayout={(e) => setWidth(e.nativeEvent.layout.width)}
+      className={`overflow-hidden rounded-xl bg-surface-sunken ${className}`}
+      style={style}
+    >
+      {width > 0 ? (
+        <AnimatedView
+          pointerEvents="none"
+          style={{
+            position: 'absolute',
+            top: 0,
+            bottom: 0,
+            width: bar,
+            backgroundColor: 'rgba(255,255,255,0.55)',
+            transform: [{ translateX }, { skewX: '-18deg' }],
+          }}
+        />
+      ) : null}
+    </View>
   );
 }

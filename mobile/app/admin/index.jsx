@@ -7,7 +7,7 @@ import Screen from '../../src/components/ui/Screen';
 import PageTitle from '../../src/components/ui/PageTitle';
 import { useBreakpoint } from '../../src/hooks/useBreakpoint';
 import StatCard from '../../src/components/ui/StatCard';
-import Skeleton from '../../src/components/ui/Skeleton';
+import { ListCardSkeleton, StatGridSkeleton } from '../../src/components/feedback/skeletons';
 import SectionHeader from '../../src/components/ui/SectionHeader';
 import Card from '../../src/components/ui/Card';
 import { useBanners } from '../../src/features/banners/bannerService';
@@ -29,7 +29,7 @@ export default function AdminDashboard() {
   const { isWide } = useBreakpoint();
   const { data: banners = [] } = useBanners();
   const { data: notices = [], isLoading: noticesLoading } = useNotices();
-  const { data: events = [] } = useEvents();
+  const { data: events = [], isLoading: eventsLoading } = useEvents();
   const { data: gallery = [] } = useGallery();
   const { data: downloads = [] } = useDownloads();
 
@@ -40,6 +40,11 @@ export default function AdminDashboard() {
     <Screen>
       <PageTitle title="Dashboard" subtitle="Overview of school content" />
 
+      {noticesLoading || eventsLoading ? (
+        <View className="mb-5">
+          <StatGridSkeleton />
+        </View>
+      ) : (
       <View className="mb-5 flex-row flex-wrap" style={{ gap: 10 }}>
         {[
           { icon: <Bell size={16} color="#2A44B8" />, value: notices?.length ?? 0, label: 'Notices', highlight: true },
@@ -52,6 +57,7 @@ export default function AdminDashboard() {
           </View>
         ))}
       </View>
+      )}
 
       <SectionHeader title="Quick actions" />
       <View className="mb-6 flex-row flex-wrap" style={{ gap: 10 }}>
@@ -79,7 +85,7 @@ export default function AdminDashboard() {
         onAction={() => router.push('/admin/notices')}
       />
       {noticesLoading ? (
-        <Skeleton className="h-24 w-full" />
+        <ListCardSkeleton count={3} />
       ) : (
         <View style={{ gap: 10 }}>
           {recent.map((n) => (

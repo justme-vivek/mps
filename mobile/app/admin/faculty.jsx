@@ -1,11 +1,10 @@
 import React, { useState } from 'react';
-import { FlatList } from 'react-native';
 import Text from '../../src/components/ui/Text';
 import Screen from '../../src/components/ui/Screen';
-import Skeleton from '../../src/components/ui/Skeleton';
 import EmptyState from '../../src/components/ui/EmptyState';
 import ConfirmDialog from '../../src/components/ui/ConfirmDialog';
 import Input from '../../src/components/ui/Input';
+import AdminList from '../../src/components/admin/AdminList';
 import EntityCard from '../../src/components/admin/EntityCard';
 import AdminAddFab from '../../src/components/admin/AdminAddFab';
 import FormModal from '../../src/components/admin/FormModal';
@@ -18,7 +17,8 @@ import { useToast } from '../../src/components/ui/Toast';
 const EMPTY = { name: '', designation: '', bio: '', order: '0', media: { url: null, file: null } };
 
 export default function AdminFaculty() {
-  const { data: faculty = [], isLoading } = useFaculty();
+  const list = useFaculty();
+  const faculty = list.data || [];
   const { create, update, remove } = useEntityMutations({
     service: facultyService,
     keys: facultyService.keys,
@@ -74,12 +74,9 @@ export default function AdminFaculty() {
 
   return (
     <Screen scroll={false} maxWidth={960}>
-      <FlatList
-        style={{ flex: 1 }}
-        data={faculty || []}
-        keyExtractor={(item) => item._id}
-        contentContainerStyle={{ paddingBottom: 120 }}
-        showsVerticalScrollIndicator={false}
+      <AdminList
+        list={list}
+        thumb
         renderItem={({ item }) => (
           <EntityCard
             title={item.name}
@@ -90,13 +87,7 @@ export default function AdminFaculty() {
             onDelete={() => setDeleting(item)}
           />
         )}
-        ListEmptyComponent={
-          isLoading ? (
-            <Skeleton className="h-24 w-full" />
-          ) : (
-            <EmptyState title="No faculty yet" message="Tap + to add faculty profiles." />
-          )
-        }
+        empty={<EmptyState title="No faculty yet" message="Tap + to add faculty profiles." />}
       />
 
       <AdminAddFab label="Add faculty" onPress={openCreate} />

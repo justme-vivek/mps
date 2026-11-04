@@ -1,18 +1,17 @@
 import React, { useState } from 'react';
-import { FlatList } from 'react-native';
 import Text from '../../src/components/ui/Text';
 import Screen from '../../src/components/ui/Screen';
-import Skeleton from '../../src/components/ui/Skeleton';
 import EmptyState from '../../src/components/ui/EmptyState';
 import ConfirmDialog from '../../src/components/ui/ConfirmDialog';
 import Badge from '../../src/components/ui/Badge';
 import Input from '../../src/components/ui/Input';
+import AdminList from '../../src/components/admin/AdminList';
 import EntityCard from '../../src/components/admin/EntityCard';
 import AdminAddFab from '../../src/components/admin/AdminAddFab';
 import FormModal from '../../src/components/admin/FormModal';
 import { Field, SwitchRow } from '../../src/components/admin/Field';
 import PdfPickerField from '../../src/components/admin/PdfPickerField';
-import { useNotices, noticeService } from '../../src/features/notices/noticeService';
+import { useNoticesInfinite, noticeService } from '../../src/features/notices/noticeService';
 import { useEntityMutations } from '../../src/hooks/useEntityMutations';
 import { useToast } from '../../src/components/ui/Toast';
 import { toDateInput } from '../../src/utils/format';
@@ -28,7 +27,8 @@ const EMPTY = {
 };
 
 export default function AdminNotices() {
-  const { data: notices = [], isLoading } = useNotices();
+  const list = useNoticesInfinite();
+  const notices = list.data || [];
   const { create, update, remove } = useEntityMutations({
     service: noticeService,
     keys: noticeService.keys,
@@ -84,12 +84,8 @@ export default function AdminNotices() {
 
   return (
     <Screen scroll={false} maxWidth={960}>
-      <FlatList
-        style={{ flex: 1 }}
-        data={notices || []}
-        keyExtractor={(item) => item._id}
-        contentContainerStyle={{ paddingBottom: 120 }}
-        showsVerticalScrollIndicator={false}
+      <AdminList
+        list={list}
         renderItem={({ item }) => (
           <EntityCard
             title={item.title}
@@ -106,13 +102,7 @@ export default function AdminNotices() {
             onDelete={() => setDeleting(item)}
           />
         )}
-        ListEmptyComponent={
-          isLoading ? (
-            <Skeleton className="h-24 w-full" />
-          ) : (
-            <EmptyState title="No notices yet" message="Tap + to publish your first notice." />
-          )
-        }
+        empty={<EmptyState title="No notices yet" message="Tap + to publish your first notice." />}
       />
 
       <AdminAddFab label="New notice" onPress={openCreate} />

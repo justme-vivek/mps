@@ -1,15 +1,16 @@
 import React, { useState } from 'react';
-import { FlatList, Pressable, View } from 'react-native';
+import { Pressable, View } from 'react-native';
 import Text from '../../src/components/ui/Text';
 import { FileText, Trash2, Upload } from 'lucide-react-native';
 import Screen from '../../src/components/ui/Screen';
 import PageTitle from '../../src/components/ui/PageTitle';
 import { colors } from '../../src/theme/tokens';
-import Skeleton from '../../src/components/ui/Skeleton';
+import AdminList from '../../src/components/admin/AdminList';
+import { CardSkeleton } from '../../src/components/feedback/skeletons';
 import EmptyState from '../../src/components/ui/EmptyState';
 import ConfirmDialog from '../../src/components/ui/ConfirmDialog';
 import Badge from '../../src/components/ui/Badge';
-import { useDownloads, downloadService } from '../../src/features/downloads/downloadService';
+import { useDownloadsInfinite, downloadService } from '../../src/features/downloads/downloadService';
 import { useEntityMutations } from '../../src/hooks/useEntityMutations';
 import { pickPdf } from '../../src/utils/pickers';
 import { useToast } from '../../src/components/ui/Toast';
@@ -18,7 +19,7 @@ import { toDateInput } from '../../src/utils/format';
 
 export default function AdminDownloads() {
   const toast = useToast();
-  const { data: downloads = [], isLoading } = useDownloads();
+  const list = useDownloadsInfinite();
   const { create, remove } = useEntityMutations({
     service: downloadService,
     keys: downloadService.keys,
@@ -60,16 +61,10 @@ export default function AdminDownloads() {
         </Text>
       </Pressable>
 
-      {isLoading ? (
-        <Skeleton className="h-20 w-full" />
-      ) : (
-        <FlatList
-          data={downloads || []}
-          keyExtractor={(item) => item._id}
-          style={{ flex: 1 }}
-          contentContainerStyle={{ paddingBottom: 120 }}
-          showsVerticalScrollIndicator={false}
-          renderItem={({ item }) => (
+      <AdminList
+        list={list}
+        skeleton={<CardSkeleton count={4} />}
+        renderItem={({ item }) => (
             <View className="mb-3 flex-row items-center rounded-card border-[1.5px] border-line bg-surface p-3.5">
               <View className="mr-3 h-11 w-11 items-center justify-center rounded-2xl bg-danger-50">
                 <FileText size={20} color={colors.danger} />
@@ -93,15 +88,12 @@ export default function AdminDownloads() {
                 <Trash2 size={18} color={colors.danger} />
               </Pressable>
             </View>
-          )}
-          ListEmptyComponent={
-            <EmptyState
+        )}
+        empty={<EmptyState
               title="No downloads yet"
               message="Publish admission forms, circulars and syllabi as PDFs."
-            />
-          }
-        />
-      )}
+            />}
+      />
 
       <ConfirmDialog
         visible={!!deleting}

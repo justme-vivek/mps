@@ -1,4 +1,5 @@
 const MediaAsset = require('../models/MediaAsset');
+const { findPaged } = require('../utils/paginate');
 const { uploadToImagekit, deleteFromImagekit } = require('../utils/media');
 
 // @desc    Upload an image or PDF to the media library (ImageKit)
@@ -37,7 +38,7 @@ const getMedia = async (req, res) => {
     if (['image', 'pdf'].includes(req.query.type)) {
       filter.type = req.query.type;
     }
-    const assets = await MediaAsset.find(filter).sort({ createdAt: -1 });
+    const assets = await findPaged(MediaAsset, filter, { createdAt: -1, _id: -1 }, req, res);
     res.json(assets);
   } catch (error) {
     res.status(500).json({ message: 'Failed to load media', error: error.message });

@@ -6,9 +6,12 @@ import { Stack, useRouter, usePathname } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
-import { QueryClientProvider } from '@tanstack/react-query';
+import { PersistQueryClientProvider } from '@tanstack/react-query-persist-client';
 import * as SplashScreen from 'expo-splash-screen';
-import { queryClient } from '../src/services/queryClient';
+import { persistOptions, queryClient } from '../src/services/queryClient';
+import { startNetworkMonitor } from '../src/services/network';
+import NetworkBanner from '../src/components/feedback/NetworkBanner';
+import TopProgress from '../src/components/feedback/TopProgress';
 import { AuthProvider, useAuth } from '../src/features/auth/AuthContext';
 import { ToastProvider } from '../src/components/ui/Toast';
 import { useFonts } from 'expo-font';
@@ -20,6 +23,7 @@ import {
 import { colors } from '../src/theme/tokens';
 
 SplashScreen.preventAutoHideAsync().catch(() => {});
+startNetworkMonitor();
 
 /**
  * Role-based routing:
@@ -89,14 +93,16 @@ export default function RootLayout() {
   return (
     <GestureHandlerRootView style={{ flex: 1, backgroundColor: colors.paper }}>
       <SafeAreaProvider>
-        <QueryClientProvider client={queryClient}>
+        <PersistQueryClientProvider client={queryClient} persistOptions={persistOptions}>
           <ToastProvider>
             <AuthProvider>
               <RootNavigator />
+              <TopProgress />
+              <NetworkBanner />
             </AuthProvider>
           </ToastProvider>
           <StatusBar style="auto" />
-        </QueryClientProvider>
+        </PersistQueryClientProvider>
       </SafeAreaProvider>
     </GestureHandlerRootView>
   );
