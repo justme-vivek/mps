@@ -1,8 +1,11 @@
 import React from 'react';
-import { Pressable, Text, View } from 'react-native';
+import { Pressable, View } from 'react-native';
+import Text from '../../src/components/ui/Text';
 import { useRouter } from 'expo-router';
 import { Bell, CalendarDays, DownloadCloud, Images, Megaphone } from 'lucide-react-native';
 import Screen from '../../src/components/ui/Screen';
+import PageTitle from '../../src/components/ui/PageTitle';
+import { useBreakpoint } from '../../src/hooks/useBreakpoint';
 import StatCard from '../../src/components/ui/StatCard';
 import Skeleton from '../../src/components/ui/Skeleton';
 import SectionHeader from '../../src/components/ui/SectionHeader';
@@ -23,6 +26,7 @@ const ACTIONS = [
 
 export default function AdminDashboard() {
   const router = useRouter();
+  const { isWide } = useBreakpoint();
   const { data: banners = [] } = useBanners();
   const { data: notices = [], isLoading: noticesLoading } = useNotices();
   const { data: events = [] } = useEvents();
@@ -34,30 +38,36 @@ export default function AdminDashboard() {
 
   return (
     <Screen>
-      <Text className="mb-1 text-2xl font-black text-ink">Dashboard</Text>
-      <Text className="mb-4 text-[13px] text-ink-muted">Overview of school content</Text>
+      <PageTitle title="Dashboard" subtitle="Overview of school content" />
 
-      <View className="mb-3 flex-row" style={{ gap: 10 }}>
-        <StatCard icon={<Bell size={16} color="#4F46E5" />} value={notices?.length ?? 0} label="Notices" />
-        <StatCard icon={<CalendarDays size={16} color="#B45309" />} value={events?.length ?? 0} label="Events" tone="accent" />
-      </View>
-      <View className="mb-5 flex-row" style={{ gap: 10 }}>
-        <StatCard icon={<Images size={16} color="#16A34A" />} value={gallery?.length ?? 0} label="Photos" tone="success" />
-        <StatCard icon={<DownloadCloud size={16} color="#4F46E5" />} value={downloadsCount} label="PDF downloads" />
+      <View className="mb-5 flex-row flex-wrap" style={{ gap: 10 }}>
+        {[
+          { icon: <Bell size={16} color="#2A44B8" />, value: notices?.length ?? 0, label: 'Notices', highlight: true },
+          { icon: <CalendarDays size={16} color="#6B4E00" />, value: events?.length ?? 0, label: 'Events', tone: 'accent' },
+          { icon: <Images size={16} color="#0F6B38" />, value: gallery?.length ?? 0, label: 'Photos', tone: 'success' },
+          { icon: <DownloadCloud size={16} color="#2A44B8" />, value: downloadsCount, label: 'PDF downloads' },
+        ].map((stat) => (
+          <View key={stat.label} style={{ flexGrow: 1, flexBasis: isWide ? '22%' : '45%' }}>
+            <StatCard {...stat} />
+          </View>
+        ))}
       </View>
 
       <SectionHeader title="Quick actions" />
-      <View className="mb-6 flex-row flex-wrap justify-between" style={{ rowGap: 10 }}>
+      <View className="mb-6 flex-row flex-wrap" style={{ gap: 10 }}>
         {ACTIONS.map(({ label, icon: Icon, route }) => (
           <Pressable
             key={label}
             onPress={() => router.push(route)}
-            className="w-[48.5%] flex-row items-center rounded-2xl border border-line bg-surface px-3.5 py-3.5"
+            accessibilityRole="button"
+            accessibilityLabel={label}
+            className="min-h-[56px] flex-row items-center rounded-2xl border-[1.5px] border-line bg-surface px-3.5"
+            style={{ flexGrow: 1, flexBasis: isWide ? '22%' : '45%' }}
           >
             <View className="h-9 w-9 items-center justify-center rounded-xl bg-primary-50">
-              <Icon size={16} color="#4F46E5" />
+              <Icon size={16} color="#2A44B8" />
             </View>
-            <Text className="ml-2.5 text-[13px] font-bold text-ink">{label}</Text>
+            <Text className="ml-2.5 text-[14px] font-bold text-ink">{label}</Text>
           </Pressable>
         ))}
       </View>

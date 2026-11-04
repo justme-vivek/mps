@@ -1,7 +1,8 @@
 import React from 'react';
-import { Text, View } from 'react-native';
+import { Pressable, View } from 'react-native';
 import { useRouter, useLocalSearchParams } from 'expo-router';
 import { ChevronLeft, FileText } from 'lucide-react-native';
+import Text from '../../../src/components/ui/Text';
 import Screen from '../../../src/components/ui/Screen';
 import Card from '../../../src/components/ui/Card';
 import Button from '../../../src/components/ui/Button';
@@ -12,7 +13,20 @@ import ContentActions from '../../../src/components/common/ContentActions';
 import { useNotice } from '../../../src/features/notices/noticeService';
 import { usePdfDownload } from '../../../src/hooks/usePdfDownload';
 import { formatDate } from '../../../src/utils/format';
-import { Pressable } from 'react-native';
+import { colors } from '../../../src/theme/tokens';
+
+function BackButton({ router }) {
+  return (
+    <Pressable
+      onPress={() => (router.canGoBack() ? router.back() : router.replace('/notices'))}
+      accessibilityRole="button"
+      accessibilityLabel="Back to notices"
+      className="h-11 w-11 items-center justify-center rounded-full border-[1.5px] border-line bg-surface"
+    >
+      <ChevronLeft size={22} color={colors.ink} />
+    </Pressable>
+  );
+}
 
 export default function NoticeDetail() {
   const router = useRouter();
@@ -22,7 +36,7 @@ export default function NoticeDetail() {
 
   if (isLoading) {
     return (
-      <Screen>
+      <Screen maxWidth={760}>
         <Skeleton className="mb-4 h-8 w-2/3" />
         <Skeleton className="mb-6 h-64 w-full" />
       </Screen>
@@ -31,19 +45,19 @@ export default function NoticeDetail() {
 
   if (!notice) {
     return (
-      <Screen>
+      <Screen maxWidth={760}>
+        <View className="mb-4 flex-row">
+          <BackButton router={router} />
+        </View>
         <EmptyState title="Notice not found" message="It may have been removed." />
       </Screen>
     );
   }
 
   return (
-    <Screen>
-      {/* Header */}
+    <Screen maxWidth={760}>
       <View className="mb-4 flex-row items-center justify-between">
-        <Pressable onPress={() => router.back()} hitSlop={8} className="h-10 w-10 items-center justify-center rounded-full bg-surface">
-          <ChevronLeft size={22} color="#111827" />
-        </Pressable>
+        <BackButton router={router} />
         <ContentActions
           itemType="notice"
           itemId={notice._id}
@@ -57,32 +71,32 @@ export default function NoticeDetail() {
         {notice.isImportant ? <Badge label="Important" tone="danger" /> : null}
       </View>
 
-      <Text className="text-2xl font-black leading-7 text-ink">{notice.title}</Text>
-      <Text className="mt-1 text-[13px] font-medium text-ink-faint">{formatDate(notice.date)}</Text>
+      <Text accessibilityRole="header" className="font-serif text-[30px] leading-[38px] text-ink">
+        {notice.title}
+      </Text>
+      <Text className="mt-1 text-[14px] text-ink-muted">{formatDate(notice.date)}</Text>
 
       <Card className="mt-4">
-        <Text className="text-[15px] leading-6 text-ink-soft">{notice.content}</Text>
+        <Text className="text-[16px] leading-[26px] text-ink-soft">{notice.content}</Text>
       </Card>
 
       {notice.pdfUrl ? (
         <Card className="mt-4">
           <View className="flex-row items-center">
-            <View className="h-11 w-11 items-center justify-center rounded-2xl bg-danger-50">
-              <FileText size={20} color="#DC2626" />
+            <View className="h-11 w-11 items-center justify-center rounded-xl bg-primary-50">
+              <FileText size={20} color={colors.pen} />
             </View>
             <View className="ml-3 flex-1">
-              <Text className="text-[15px] font-bold text-ink">Attached PDF</Text>
-              <Text className="text-[12px] text-ink-muted">Tap below to download and share</Text>
+              <Text className="text-[16px] font-bold text-ink">Attached PDF</Text>
+              <Text className="text-[13px] text-ink-muted">Download it to read offline or share</Text>
             </View>
           </View>
-          <View className="mt-3 flex-row" style={{ gap: 10 }}>
-            <View className="flex-1">
-              <Button
-                title="Download"
-                loading={busyId === notice._id}
-                onPress={() => downloadRun({ _id: notice._id, title: notice.title, fileUrl: notice.pdfUrl })}
-              />
-            </View>
+          <View className="mt-3">
+            <Button
+              title="Download PDF"
+              loading={busyId === notice._id}
+              onPress={() => downloadRun({ _id: notice._id, title: notice.title, fileUrl: notice.pdfUrl })}
+            />
           </View>
         </Card>
       ) : null}

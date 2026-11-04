@@ -1,8 +1,13 @@
 import React, { useState } from 'react';
-import { FlatList, Pressable, Text, View } from 'react-native';
-import { FileText, Plus, Trash2, Upload } from 'lucide-react-native';
+import { FlatList, Pressable, View } from 'react-native';
+import Text from '../../src/components/ui/Text';
+import { FileText, Trash2, Upload } from 'lucide-react-native';
 import { Image } from 'expo-image';
 import Screen from '../../src/components/ui/Screen';
+import PageTitle from '../../src/components/ui/PageTitle';
+import Chip from '../../src/components/ui/Chip';
+import { colors } from '../../src/theme/tokens';
+import { useBreakpoint } from '../../src/hooks/useBreakpoint';
 import Skeleton from '../../src/components/ui/Skeleton';
 import EmptyState from '../../src/components/ui/EmptyState';
 import ConfirmDialog from '../../src/components/ui/ConfirmDialog';
@@ -22,6 +27,7 @@ const FILTERS = [
 
 export default function AdminMedia() {
   const toast = useToast();
+  const { isWide, isMedium } = useBreakpoint();
   const [type, setType] = useState(undefined);
   const { data: assets = [], isLoading } = useMediaAssets(type);
   const { upload, remove } = useMediaMutations();
@@ -42,17 +48,15 @@ export default function AdminMedia() {
     }
   };
 
+  const cols = isWide ? 5 : isMedium ? 4 : 3;
+
   return (
-    <Screen>
-      <View className="mb-3 flex-row" style={{ gap: 8 }}>
+    <Screen scroll={false} maxWidth={960}>
+      <PageTitle title="Media library" subtitle="Images and PDFs stored in ImageKit." />
+
+      <View className="mb-3 flex-row flex-wrap" style={{ gap: 8 }}>
         {FILTERS.map(({ key, label }) => (
-          <Pressable
-            key={label}
-            onPress={() => setType(key)}
-            className={`rounded-full px-3.5 py-1.5 ${type === key ? 'bg-primary-600' : 'bg-surface-sunken'}`}
-          >
-            <Text className={`text-[12px] font-bold ${type === key ? 'text-white' : 'text-ink-soft'}`}>{label}</Text>
-          </Pressable>
+          <Chip key={label} label={label} selected={type === key} onPress={() => setType(key)} />
         ))}
       </View>
 
@@ -60,18 +64,22 @@ export default function AdminMedia() {
         <Pressable
           onPress={() => handleUpload(pickImage)}
           disabled={uploading}
-          className="flex-1 flex-row items-center justify-center rounded-2xl bg-primary-600 py-3"
+          accessibilityRole="button"
+          accessibilityLabel="Upload image"
+          className="min-h-[48px] flex-1 flex-row items-center justify-center rounded-2xl border-[1.5px] border-primary-700 bg-primary-600"
         >
           <Upload size={16} color="#FFFFFF" />
-          <Text className="ml-1.5 text-[13px] font-bold text-white">{uploading ? 'Uploading…' : 'Image'}</Text>
+          <Text className="ml-1.5 text-[14px] font-bold text-white">{uploading ? 'Uploading…' : 'Upload image'}</Text>
         </Pressable>
         <Pressable
           onPress={() => handleUpload(pickPdf)}
           disabled={uploading}
-          className="flex-1 flex-row items-center justify-center rounded-2xl border border-primary-600 py-3"
+          accessibilityRole="button"
+          accessibilityLabel="Upload PDF"
+          className="min-h-[48px] flex-1 flex-row items-center justify-center rounded-2xl border-[1.5px] border-primary-600 bg-surface"
         >
-          <Upload size={16} color="#4F46E5" />
-          <Text className="ml-1.5 text-[13px] font-bold text-primary-600">PDF</Text>
+          <Upload size={16} color={colors.pen} />
+          <Text className="ml-1.5 text-[14px] font-bold text-primary">Upload PDF</Text>
         </Pressable>
       </View>
 
@@ -83,39 +91,49 @@ export default function AdminMedia() {
         </View>
       ) : (
         <FlatList
+          key={cols}
           data={assets || []}
           keyExtractor={(item) => item._id}
-          numColumns={3}
+          numColumns={cols}
+          style={{ flex: 1 }}
           columnWrapperStyle={{ gap: 10, marginBottom: 10 }}
-          contentContainerStyle={{ paddingBottom: 110 }}
+          contentContainerStyle={{ paddingBottom: 120 }}
           showsVerticalScrollIndicator={false}
           renderItem={({ item }) => (
-            <View className="flex-1 overflow-hidden rounded-2xl border border-line bg-surface">
-              <View className="h-24">
+            <View className="flex-1 overflow-hidden rounded-2xl border-[1.5px] border-line bg-surface">
+              <View className="h-24 bg-surface-alt">
                 {item.type === 'image' ? (
-                  <Image source={{ uri: ik(item.url, 'w-300,q-70') }} className="h-full w-full" contentFit="cover" transition={150} />
+                  <Image
+                    source={{ uri: ik(item.url, 'w-300,q-70') }}
+                    style={{ width: '100%', height: '100%' }}
+                    contentFit="cover"
+                    transition={150}
+                    accessibilityLabel={item.name}
+                  />
                 ) : (
                   <View className="h-full items-center justify-center">
-                    <FileText size={28} color="#DC2626" />
+                    <FileText size={28} color={colors.danger} />
                   </View>
                 )}
               </View>
-              <View className="px-2 py-1.5">
-                <Text className="text-[11px] font-semibold text-ink-soft" numberOfLines={1}>
+              <View className="px-2 pt-1.5">
+                <Text className="text-[12px] font-bold text-ink-soft" numberOfLines={1}>
                   {item.name}
                 </Text>
                 <View className="mt-1 flex-row items-center justify-between">
                   <Badge label={item.type === 'image' ? 'Image' : 'PDF'} tone={item.type === 'image' ? 'primary' : 'danger'} />
-                  <Text className="text-[10px] text-ink-faint">{formatBytes(item.size)}</Text>
+                  <Text className="text-[12px] text-ink-faint">{formatBytes(item.size)}</Text>
                 </View>
-                <Pressable
-                  onPress={() => setDeleting(item)}
-                  className="mt-2 flex-row items-center justify-center rounded-lg bg-danger-50 py-1.5"
-                >
-                  <Trash2 size={13} color="#DC2626" />
-                  <Text className="ml-1 text-[11px] font-bold text-danger">Delete</Text>
-                </Pressable>
               </View>
+              <Pressable
+                onPress={() => setDeleting(item)}
+                accessibilityRole="button"
+                accessibilityLabel={`Delete ${item.name}`}
+                className="mt-1 min-h-[44px] flex-row items-center justify-center border-t-[1.5px] border-line"
+              >
+                <Trash2 size={14} color={colors.danger} />
+                <Text className="ml-1 text-[13px] font-bold text-danger">Delete</Text>
+              </Pressable>
             </View>
           )}
           ListEmptyComponent={

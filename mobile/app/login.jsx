@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
-import { KeyboardAvoidingView, Platform, Pressable, ScrollView, Text, View } from 'react-native';
+import { KeyboardAvoidingView, Platform, Pressable, ScrollView, View } from 'react-native';
+import Text from '../src/components/ui/Text';
 import { Controller, useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
@@ -74,12 +75,15 @@ export default function Login() {
     <SafeAreaView className="flex-1 bg-surface-alt">
       <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : undefined} className="flex-1">
         <ScrollView keyboardShouldPersistTaps="handled" contentContainerClassName="flex-grow justify-center px-6 py-8">
+         <View className="w-full self-center" style={{ maxWidth: 440 }}>
           <View className="mb-8 items-center">
-            <View className="h-20 w-20 items-center justify-center rounded-3xl bg-primary-600">
-              <Text className="text-3xl font-black text-white">M</Text>
+            <View className="h-20 w-20 items-center justify-center rounded-[24px] bg-primary-700">
+              <Text className="font-serif text-[40px] text-accent">M</Text>
             </View>
-            <Text className="mt-3 text-2xl font-black text-ink">Modern Public School</Text>
-            <Text className="mt-1 text-sm text-ink-muted">
+            <Text accessibilityRole="header" className="mt-4 text-center font-serif text-[28px] leading-9 text-ink">
+              Modern Public School
+            </Text>
+            <Text className="mt-1 text-[15px] text-ink-muted">
               {mode === 'login' ? 'Sign in to continue' : 'Create your account'}
             </Text>
           </View>
@@ -109,8 +113,8 @@ export default function Login() {
                   <Input label="Password" placeholder="••••••••" secure value={value} onChangeText={onChange} error={error?.message} />
                 )}
               />
-              <Pressable onPress={() => router.push('/forgot-password')} className="mb-4 self-end">
-                <Text className="text-[13px] font-bold text-primary-600">Forgot password?</Text>
+              <Pressable onPress={() => router.push('/forgot-password')} accessibilityRole="link" className="mb-3 min-h-[44px] justify-center self-end">
+                <Text className="text-[14px] font-bold text-primary-600">Forgot password?</Text>
               </Pressable>
               <Button
                 title="Sign In"
@@ -121,7 +125,7 @@ export default function Login() {
               />
               <View className="mt-5 flex-row justify-center">
                 <Text className="text-sm text-ink-muted">New here? </Text>
-                <Pressable onPress={() => setMode('register')}>
+                <Pressable onPress={() => setMode('register')} className="min-h-[44px] justify-center">
                   <Text className="text-sm font-bold text-primary-600">Create an account</Text>
                 </Pressable>
               </View>
@@ -162,16 +166,21 @@ export default function Login() {
               />
               <View className="mt-5 flex-row justify-center">
                 <Text className="text-sm text-ink-muted">Already have an account? </Text>
-                <Pressable onPress={() => setMode('login')}>
+                <Pressable onPress={() => setMode('login')} className="min-h-[44px] justify-center">
                   <Text className="text-sm font-bold text-primary-600">Sign in</Text>
                 </Pressable>
               </View>
             </View>
           )}
 
-          <Pressable onPress={() => router.back()} className="mt-8 items-center">
-            <Text className="text-sm font-semibold text-ink-muted">Continue browsing as guest</Text>
+          <Pressable
+            onPress={() => (router.canGoBack() ? router.back() : router.replace('/'))}
+            accessibilityRole="button"
+            className="mt-6 min-h-[44px] items-center justify-center"
+          >
+            <Text className="text-[15px] font-bold text-ink-muted">Continue browsing as guest</Text>
           </Pressable>
+         </View>
         </ScrollView>
       </KeyboardAvoidingView>
     </SafeAreaView>

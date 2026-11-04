@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
-import { ActivityIndicator, Pressable, Text, TextInput, View } from 'react-native';
+import { ActivityIndicator, Pressable, TextInput, View } from 'react-native';
+import Text from '../src/components/ui/Text';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { ChevronLeft } from 'lucide-react-native';
@@ -117,16 +118,16 @@ export default function OtpVerify() {
 
   return (
     <SafeAreaView className="flex-1 bg-surface-alt">
-      <View className="flex-1 px-6">
+      <View className="w-full flex-1 self-center px-6" style={{ maxWidth: 480 }}>
         <Pressable
           onPress={() => router.back()}
           hitSlop={8}
-          className="mt-2 h-10 w-10 items-center justify-center rounded-full bg-surface"
+          className="mt-2 h-11 w-11 items-center justify-center rounded-full border-[1.5px] border-line bg-surface"
         >
-          <ChevronLeft size={22} color="#111827" />
+          <ChevronLeft size={22} color="#1B2A59" />
         </Pressable>
 
-        <Text className="mt-6 text-2xl font-black text-ink">Enter the code</Text>
+        <Text accessibilityRole="header" className="mt-6 font-serif text-[28px] leading-9 text-ink">Enter the code</Text>
         <Text className="mt-1 text-[14px] leading-5 text-ink-muted">
           We sent a 6-digit code to{'\n'}
           <Text className="font-bold text-ink">{email}</Text>
@@ -148,7 +149,7 @@ export default function OtpVerify() {
             {[0, 1, 2, 3, 4, 5].map((i) => (
               <View
                 key={i}
-                className={`h-14 w-11 items-center justify-center rounded-xl border ${
+                className={`h-14 w-11 items-center justify-center rounded-xl border-[1.5px] ${
                   code.length === i ? 'border-primary-600 bg-primary-50' : 'border-line bg-surface'
                 }`}
               >
@@ -160,7 +161,7 @@ export default function OtpVerify() {
 
         <View className="mt-6 h-6 items-center">
           {busy ? (
-            <ActivityIndicator color="#4F46E5" />
+            <ActivityIndicator color="#2A44B8" />
           ) : (
             <Text className="text-[13px] text-ink-faint">
               {code.length === 6 ? 'Verifying…' : 'The code verifies automatically.'}

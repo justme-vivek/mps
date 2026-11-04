@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
-import { FlatList, Pressable, Text } from 'react-native';
-import { Plus } from 'lucide-react-native';
+import { FlatList } from 'react-native';
+import Text from '../../src/components/ui/Text';
 import Screen from '../../src/components/ui/Screen';
 import Skeleton from '../../src/components/ui/Skeleton';
 import EmptyState from '../../src/components/ui/EmptyState';
@@ -8,6 +8,7 @@ import ConfirmDialog from '../../src/components/ui/ConfirmDialog';
 import Badge from '../../src/components/ui/Badge';
 import Input from '../../src/components/ui/Input';
 import EntityCard from '../../src/components/admin/EntityCard';
+import AdminAddFab from '../../src/components/admin/AdminAddFab';
 import FormModal from '../../src/components/admin/FormModal';
 import { Field, SwitchRow } from '../../src/components/admin/Field';
 import PdfPickerField from '../../src/components/admin/PdfPickerField';
@@ -82,11 +83,12 @@ export default function AdminNotices() {
   };
 
   return (
-    <Screen>
+    <Screen scroll={false} maxWidth={960}>
       <FlatList
+        style={{ flex: 1 }}
         data={notices || []}
         keyExtractor={(item) => item._id}
-        contentContainerStyle={{ paddingBottom: 110 }}
+        contentContainerStyle={{ paddingBottom: 120 }}
         showsVerticalScrollIndicator={false}
         renderItem={({ item }) => (
           <EntityCard
@@ -113,12 +115,7 @@ export default function AdminNotices() {
         }
       />
 
-      <Pressable
-        onPress={openCreate}
-        className="absolute bottom-8 right-6 h-14 w-14 items-center justify-center rounded-full bg-primary-600 shadow-lg"
-      >
-        <Plus size={26} color="#FFFFFF" />
-      </Pressable>
+      <AdminAddFab label="New notice" onPress={openCreate} />
 
       <FormModal
         visible={modalOpen}

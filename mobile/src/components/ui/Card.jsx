@@ -1,19 +1,20 @@
 import React from 'react';
 import { Pressable, View } from 'react-native';
 
-export default function Card({ children, className = '', onPress = null }) {
+/** Flat bordered card. Diary style: no shadows, 20px radius. */
+export default function Card({ children, className = '', onPress = null, accessibilityLabel }) {
+  const base = 'rounded-card border-[1.5px] border-line bg-surface p-4';
   if (onPress) {
     return (
       <Pressable
         onPress={onPress}
-        className={({ pressed }) =>
-          `rounded-3xl border border-line bg-surface p-4 shadow-sm ${pressed ? 'opacity-85' : ''} ${className}`
-        }
+        accessibilityRole="button"
+        accessibilityLabel={accessibilityLabel}
+        className={`${base} active:opacity-85 ${className}`}
       >
         {children}
       </Pressable>
     );
   }
-  return <View className={`rounded-3xl border border-line bg-surface p-4 shadow-sm ${className}`}>{children}</View>;
+  return <View className={`${base} ${className}`}>{children}</View>;
 }
-

@@ -1,32 +1,35 @@
 import React, { createContext, useCallback, useContext, useRef, useState } from 'react';
-import { Animated, Text, View } from 'react-native';
+import { Animated, Platform, View } from 'react-native';
+import Text from './Text';
 import { CheckCircle2, Info, XCircle } from 'lucide-react-native';
+import { colors } from '../../theme/tokens';
 
 const ToastContext = createContext(null);
 
 const STYLES = {
-  success: { bg: 'bg-success-50 border-success/30', icon: <CheckCircle2 size={18} color="#16A34A" />, text: 'text-success' },
-  error: { bg: 'bg-danger-50 border-danger/30', icon: <XCircle size={18} color="#DC2626" />, text: 'text-danger' },
-  info: { bg: 'bg-primary-50 border-primary/30', icon: <Info size={18} color="#4F46E5" />, text: 'text-primary-700' },
+  success: { bg: 'bg-success-50 border-success/40', icon: <CheckCircle2 size={18} color={colors.success} />, text: 'text-success' },
+  error: { bg: 'bg-danger-50 border-danger/40', icon: <XCircle size={18} color={colors.danger} />, text: 'text-danger' },
+  info: { bg: 'bg-primary-50 border-primary/40', icon: <Info size={18} color={colors.pen} />, text: 'text-primary-700' },
 };
 
 export function ToastProvider({ children }) {
   const [toast, setToast] = useState(null);
   const opacity = useRef(new Animated.Value(0)).current;
   const timer = useRef(null);
+  const useNativeDriver = Platform.OS !== 'web';
 
   const hide = useCallback(() => {
-    Animated.timing(opacity, { toValue: 0, duration: 180, useNativeDriver: true }).start();
-  }, [opacity]);
+    Animated.timing(opacity, { toValue: 0, duration: 180, useNativeDriver }).start();
+  }, [opacity, useNativeDriver]);
 
   const show = useCallback(
     (message, type = 'info', duration = 2600) => {
       if (timer.current) clearTimeout(timer.current);
       setToast({ message, type });
-      Animated.timing(opacity, { toValue: 1, duration: 180, useNativeDriver: true }).start();
+      Animated.timing(opacity, { toValue: 1, duration: 180, useNativeDriver }).start();
       timer.current = setTimeout(hide, duration);
     },
-    [hide, opacity]
+    [hide, opacity, useNativeDriver]
   );
 
   const style = STYLES[toast?.type] || STYLES.info;
@@ -37,12 +40,12 @@ export function ToastProvider({ children }) {
       {toast && (
         <Animated.View
           pointerEvents="none"
-          className="absolute left-4 right-4 top-14 z-50"
-          style={{ opacity }}
+          accessibilityLiveRegion="polite"
+          style={{ opacity, position: 'absolute', left: 16, right: 16, top: 56, zIndex: 50, alignItems: 'center' }}
         >
-          <View className={`flex-row items-center rounded-2xl border px-4 py-3 shadow-lg ${style.bg}`}>
+          <View className={`w-full max-w-[560px] flex-row items-center rounded-2xl border-[1.5px] px-4 py-3 ${style.bg}`}>
             {style.icon}
-            <Text className={`ml-2 flex-1 text-sm font-medium ${style.text}`} numberOfLines={3}>
+            <Text className={`ml-2 flex-1 text-[14px] font-bold ${style.text}`} numberOfLines={3}>
               {toast.message}
             </Text>
           </View>

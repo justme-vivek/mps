@@ -1,38 +1,29 @@
 import React from 'react';
 import { Tabs } from 'expo-router';
-import { Bell, CalendarDays, Home, Images, LayoutGrid } from 'lucide-react-native';
+import DiaryTabBar from '../../src/components/common/DiaryTabBar';
+import { useBreakpoint } from '../../src/hooks/useBreakpoint';
+import { colors } from '../../src/theme/tokens';
 
+/**
+ * Student / guest area. The tab bar is custom (DiaryTabBar): a bottom bar on
+ * phones and tablets, a top navigation bar from 1024px up.
+ */
 export default function UserLayout() {
+  const { isWide } = useBreakpoint();
   return (
     <Tabs
+      tabBar={(props) => <DiaryTabBar {...props} />}
       screenOptions={{
         headerShown: false,
-        tabBarActiveTintColor: '#4F46E5',
-        tabBarInactiveTintColor: '#9CA3AF',
-        tabBarStyle: { backgroundColor: '#FFFFFF', borderTopColor: '#E5E7EB' },
-        tabBarLabelStyle: { fontSize: 11, fontWeight: '600' },
+        tabBarPosition: isWide ? 'top' : 'bottom',
+        sceneStyle: { backgroundColor: colors.paper },
       }}
     >
-      <Tabs.Screen
-        name="index"
-        options={{ title: 'Home', tabBarIcon: ({ color, size }) => <Home size={size} color={color} /> }}
-      />
-      <Tabs.Screen
-        name="notices"
-        options={{ title: 'Notices', tabBarIcon: ({ color, size }) => <Bell size={size} color={color} /> }}
-      />
-      <Tabs.Screen
-        name="events"
-        options={{ title: 'Events', tabBarIcon: ({ color, size }) => <CalendarDays size={size} color={color} /> }}
-      />
-      <Tabs.Screen
-        name="gallery"
-        options={{ title: 'Gallery', tabBarIcon: ({ color, size }) => <Images size={size} color={color} /> }}
-      />
-      <Tabs.Screen
-        name="more"
-        options={{ title: 'More', tabBarIcon: ({ color, size }) => <LayoutGrid size={size} color={color} /> }}
-      />
+      <Tabs.Screen name="index" options={{ title: 'Home' }} />
+      <Tabs.Screen name="notices" options={{ title: 'Notices' }} />
+      <Tabs.Screen name="events" options={{ title: 'Events' }} />
+      <Tabs.Screen name="gallery" options={{ title: 'Gallery' }} />
+      <Tabs.Screen name="more" options={{ title: 'More' }} />
       {/* Detail / feature screens — hidden from the tab bar */}
       <Tabs.Screen name="notices/[id]" options={{ href: null }} />
       <Tabs.Screen name="events/[id]" options={{ href: null }} />

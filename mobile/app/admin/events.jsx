@@ -1,12 +1,13 @@
 import React, { useState } from 'react';
-import { FlatList, Pressable, Text } from 'react-native';
-import { Plus } from 'lucide-react-native';
+import { FlatList } from 'react-native';
+import Text from '../../src/components/ui/Text';
 import Screen from '../../src/components/ui/Screen';
 import Skeleton from '../../src/components/ui/Skeleton';
 import EmptyState from '../../src/components/ui/EmptyState';
 import ConfirmDialog from '../../src/components/ui/ConfirmDialog';
 import Input from '../../src/components/ui/Input';
 import EntityCard from '../../src/components/admin/EntityCard';
+import AdminAddFab from '../../src/components/admin/AdminAddFab';
 import FormModal from '../../src/components/admin/FormModal';
 import { Field } from '../../src/components/admin/Field';
 import ImagePickerField from '../../src/components/admin/ImagePickerField';
@@ -75,11 +76,12 @@ export default function AdminEvents() {
   };
 
   return (
-    <Screen>
+    <Screen scroll={false} maxWidth={960}>
       <FlatList
+        style={{ flex: 1 }}
         data={events || []}
         keyExtractor={(item) => item._id}
-        contentContainerStyle={{ paddingBottom: 110 }}
+        contentContainerStyle={{ paddingBottom: 120 }}
         showsVerticalScrollIndicator={false}
         renderItem={({ item }) => (
           <EntityCard
@@ -100,12 +102,7 @@ export default function AdminEvents() {
         }
       />
 
-      <Pressable
-        onPress={openCreate}
-        className="absolute bottom-8 right-6 h-14 w-14 items-center justify-center rounded-full bg-primary-600 shadow-lg"
-      >
-        <Plus size={26} color="#FFFFFF" />
-      </Pressable>
+      <AdminAddFab label="New event" onPress={openCreate} />
 
       <FormModal
         visible={modalOpen}

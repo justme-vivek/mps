@@ -1,11 +1,13 @@
 import React, { useState } from 'react';
-import { Pressable, Text, View } from 'react-native';
+import { Pressable, View } from 'react-native';
 import { FileText, Library, Upload } from 'lucide-react-native';
+import Text from '../ui/Text';
 import { pickPdf } from '../../utils/pickers';
 import { useMediaMutations } from '../../features/media/mediaService';
 import { apiErrorMessage } from '../../services/api';
 import { useToast } from '../ui/Toast';
 import MediaPickerModal from './MediaPickerModal';
+import { colors } from '../../theme/tokens';
 
 /**
  * PDF attachment field for admin forms.
@@ -33,10 +35,10 @@ export default function PdfPickerField({ label = 'PDF attachment', value, onChan
 
   return (
     <View className="mb-4">
-      <Text className="mb-1.5 text-[13px] font-semibold text-ink-soft">{label}</Text>
-      <View className="flex-row items-center rounded-2xl border border-line bg-surface px-4 py-3">
-        <FileText size={18} color={value?.url ? '#DC2626' : '#9CA3AF'} />
-        <Text className="ml-2 flex-1 text-[13px] text-ink-soft" numberOfLines={1}>
+      <Text className="mb-1.5 text-[14px] font-bold text-ink-soft">{label}</Text>
+      <View className="min-h-[48px] flex-row items-center rounded-2xl border-[1.5px] border-line bg-surface px-4 py-3">
+        <FileText size={18} color={value?.url ? colors.pen : colors.inkFaint} />
+        <Text className="ml-2 flex-1 text-[14px] text-ink-soft" numberOfLines={1}>
           {value?.name || value?.url || 'No PDF attached'}
         </Text>
       </View>
@@ -44,23 +46,21 @@ export default function PdfPickerField({ label = 'PDF attachment', value, onChan
         <Pressable
           onPress={handleDevicePick}
           disabled={uploading}
-          className="flex-1 flex-row items-center justify-center rounded-xl border border-line bg-surface py-2.5"
+          accessibilityRole="button"
+          accessibilityLabel="Upload PDF from device"
+          className="min-h-[44px] flex-1 flex-row items-center justify-center rounded-xl border-[1.5px] border-line bg-surface"
         >
-          {uploading ? (
-            <Upload size={16} color="#4F46E5" />
-          ) : (
-            <Upload size={16} color="#4F46E5" />
-          )}
-          <Text className="ml-1.5 text-[13px] font-bold text-primary-600">
-            {uploading ? 'Uploading…' : 'Device'}
-          </Text>
+          <Upload size={16} color={colors.pen} />
+          <Text className="ml-1.5 text-[14px] font-bold text-primary">{uploading ? 'Uploading…' : 'Device'}</Text>
         </Pressable>
         <Pressable
           onPress={() => setLibraryOpen(true)}
-          className="flex-1 flex-row items-center justify-center rounded-xl border border-line bg-surface py-2.5"
+          accessibilityRole="button"
+          accessibilityLabel="Choose PDF from media library"
+          className="min-h-[44px] flex-1 flex-row items-center justify-center rounded-xl border-[1.5px] border-line bg-surface"
         >
-          <Library size={16} color="#4F46E5" />
-          <Text className="ml-1.5 text-[13px] font-bold text-primary-600">Media library</Text>
+          <Library size={16} color={colors.pen} />
+          <Text className="ml-1.5 text-[14px] font-bold text-primary">Media library</Text>
         </Pressable>
       </View>
       <MediaPickerModal

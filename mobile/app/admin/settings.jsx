@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
-import { Text, View } from 'react-native';
+import Text from '../../src/components/ui/Text';
 import Screen from '../../src/components/ui/Screen';
+import PageTitle from '../../src/components/ui/PageTitle';
 import Skeleton from '../../src/components/ui/Skeleton';
 import Input from '../../src/components/ui/Input';
 import Button from '../../src/components/ui/Button';
@@ -37,7 +38,7 @@ export default function AdminSettings() {
 
   if (isLoading) {
     return (
-      <Screen>
+      <Screen maxWidth={560}>
         <Skeleton className="mb-3 h-8 w-1/3" />
         <Skeleton className="h-64 w-full" />
       </Screen>
@@ -45,9 +46,8 @@ export default function AdminSettings() {
   }
 
   return (
-    <Screen>
-      <Text className="mb-1 text-2xl font-black text-ink">Settings</Text>
-      <Text className="mb-4 text-[13px] text-ink-muted">Global school information</Text>
+    <Screen maxWidth={560}>
+      <PageTitle title="Settings" subtitle="Global school information" />
 
       <Card className="mb-4">
         {SCHEMA.map(({ key, label }) => (

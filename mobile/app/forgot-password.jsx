@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
-import { Pressable, Text, View } from 'react-native';
+import { Pressable, View } from 'react-native';
+import Text from '../src/components/ui/Text';
 import { Controller, useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
@@ -48,16 +49,16 @@ export default function ForgotPassword() {
 
   return (
     <SafeAreaView className="flex-1 bg-surface-alt">
-      <View className="flex-1 px-6">
+      <View className="w-full flex-1 self-center px-6" style={{ maxWidth: 480 }}>
         <Pressable
           onPress={() => router.back()}
           hitSlop={8}
-          className="mt-2 h-10 w-10 items-center justify-center rounded-full bg-surface"
+          className="mt-2 h-11 w-11 items-center justify-center rounded-full border-[1.5px] border-line bg-surface"
         >
-          <ChevronLeft size={22} color="#111827" />
+          <ChevronLeft size={22} color="#1B2A59" />
         </Pressable>
 
-        <Text className="mt-6 text-2xl font-black text-ink">Forgot password?</Text>
+        <Text accessibilityRole="header" className="mt-6 font-serif text-[28px] leading-9 text-ink">Forgot password?</Text>
         <Text className="mt-1 text-[14px] leading-5 text-ink-muted">
           Enter your account email and we'll send a 6-digit code to verify it's you.
         </Text>

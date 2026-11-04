@@ -1,10 +1,13 @@
 import React from 'react';
 import { RefreshControl, ScrollView, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { useBreakpoint } from '../../hooks/useBreakpoint';
+import { colors, layout } from '../../theme/tokens';
 
 /**
- * Base screen container with safe-area padding, optional scroll and
- * pull-to-refresh wired to a react-query refetch.
+ * Base screen container: safe-area padding, optional scroll, pull-to-refresh
+ * wired to a react-query refetch, and a centred content column that is
+ * 1200px wide on laptops and full width on phones.
  */
 export default function Screen({
   children,
@@ -13,25 +16,42 @@ export default function Screen({
   refresh = null, // { refreshing, onRefresh }
   bottomTabBar = false,
   className = '',
+  maxWidth = layout.maxContentWidth,
 }) {
   const insets = useSafeAreaInsets();
-  const padding = `px-5 pt-3 ${bottomTabBar ? 'pb-28' : 'pb-10'} ${padded ? '' : 'px-0 pt-0'}`;
+  const { isWide, gutter } = useBreakpoint();
+
+  const horizontal = padded ? gutter : 0;
+  const top = padded ? 12 : 0;
+  // Phones keep room for the bottom tab bar; laptops use a top nav instead.
+  const bottom = padded ? (bottomTabBar && !isWide ? 104 : 40) : 0;
+
+  const column = {
+    width: '100%',
+    maxWidth,
+    alignSelf: 'center',
+    paddingHorizontal: horizontal,
+    paddingTop: top,
+    paddingBottom: bottom,
+  };
 
   const content = scroll ? (
     <ScrollView
       showsVerticalScrollIndicator={false}
       keyboardShouldPersistTaps="handled"
-      contentContainerClassName={padding}
+      contentContainerStyle={{ flexGrow: 1 }}
       refreshControl={
         refresh ? (
-          <RefreshControl refreshing={refresh.refreshing} onRefresh={refresh.onRefresh} tintColor="#4F46E5" />
+          <RefreshControl refreshing={refresh.refreshing} onRefresh={refresh.onRefresh} tintColor={colors.pen} />
         ) : undefined
       }
     >
-      {children}
+      <View style={column}>{children}</View>
     </ScrollView>
   ) : (
-    <View className={`flex-1 ${padding}`}>{children}</View>
+    <View className="flex-1" style={column}>
+      {children}
+    </View>
   );
 
   return (

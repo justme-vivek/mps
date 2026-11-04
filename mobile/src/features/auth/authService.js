@@ -1,10 +1,16 @@
+import { Platform } from 'react-native';
 import * as SecureStore from 'expo-secure-store';
 import { api } from '../../services/api';
 
 const SESSION_KEY = 'mps.session';
 
+// SecureStore has no web implementation. In the browser the session is kept in memory
+// only (lost on reload) — tokens are never written to localStorage.
+let webSession = null;
+
 /** Session shape: { _id, name, email, role, token } */
 export async function loadSession() {
+  if (Platform.OS === 'web') return webSession;
   try {
     const raw = await SecureStore.getItemAsync(SESSION_KEY);
     return raw ? JSON.parse(raw) : null;
@@ -14,10 +20,18 @@ export async function loadSession() {
 }
 
 export async function saveSession(session) {
+  if (Platform.OS === 'web') {
+    webSession = session;
+    return;
+  }
   await SecureStore.setItemAsync(SESSION_KEY, JSON.stringify(session));
 }
 
 export async function clearSession() {
+  if (Platform.OS === 'web') {
+    webSession = null;
+    return;
+  }
   try {
     await SecureStore.deleteItemAsync(SESSION_KEY);
   } catch {
