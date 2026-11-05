@@ -1,19 +1,29 @@
 import React, { useMemo, useState } from 'react';
-import { FlatList, Modal, Pressable, Text, View } from 'react-native';
-import { useWindowDimensions } from 'react-native';
+import { Modal, Pressable, View } from 'react-native';
 import { Image } from 'expo-image';
 import { CameraOff, X } from 'lucide-react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import Text from '../../src/components/ui/Text';
 import Screen from '../../src/components/ui/Screen';
+import PageTitle from '../../src/components/ui/PageTitle';
+import Chip from '../../src/components/ui/Chip';
 import Skeleton from '../../src/components/ui/Skeleton';
 import EmptyState from '../../src/components/ui/EmptyState';
+import DataBoundary from '../../src/components/feedback/DataBoundary';
 import PhotoCard from '../../src/components/common/PhotoCard';
 import ContentActions from '../../src/components/common/ContentActions';
 import { useGallery } from '../../src/features/gallery/galleryService';
+import { useBreakpoint } from '../../src/hooks/useBreakpoint';
+import { colors, layout } from '../../src/theme/tokens';
 import { ik } from '../../src/utils/ik';
 
+const GAP = 12;
+
 export default function GalleryScreen() {
-  const { width } = useWindowDimensions();
-  const { data: photos = [], isLoading, refetch, isRefetching } = useGallery();
+  const insets = useSafeAreaInsets();
+  const { width, columns, gutter } = useBreakpoint();
+  const gallery = useGallery();
+  const { data: photos = [], refetch, isRefetching } = gallery;
   const [category, setCategory] = useState('All');
   const [viewer, setViewer] = useState(null);
 
@@ -24,76 +34,77 @@ export default function GalleryScreen() {
   }, [photos]);
 
   const filtered = (photos || []).filter((p) => category === 'All' || (p.category || 'General') === category);
-  const size = Math.floor((width - 40 - 10) / 2);
+
+  // Tile size from the real column width, so the grid fills it exactly.
+  const content = Math.min(width, layout.maxContentWidth) - gutter * 2;
+  const size = Math.floor((content - GAP * (columns - 1)) / columns);
 
   return (
-    <Screen>
-      <Text className="mb-3 text-2xl font-black text-ink">Gallery</Text>
+    <Screen bottomTabBar refresh={{ refreshing: isRefetching, onRefresh: refetch }}>
+      <PageTitle title="Gallery" subtitle="Moments from school life" />
 
-      {/* Category chips */}
-      <View className="mb-3 flex-row flex-wrap" style={{ gap: 8 }}>
+      <View className="mb-4 flex-row flex-wrap" style={{ gap: 8, display: categories.length > 2 ? 'flex' : 'none' }}>
         {categories.map((c) => (
-          <Pressable
-            key={c}
-            onPress={() => setCategory(c)}
-            className={`rounded-full px-3.5 py-1.5 ${category === c ? 'bg-primary-600' : 'bg-surface-sunken'}`}
-          >
-            <Text className={`text-[12px] font-bold ${category === c ? 'text-white' : 'text-ink-soft'}`}>{c}</Text>
-          </Pressable>
+          <Chip key={c} label={c} selected={category === c} onPress={() => setCategory(c)} />
         ))}
       </View>
 
-      {isLoading ? (
-        <View className="flex-row flex-wrap" style={{ gap: 10 }}>
-          {[0, 1, 2, 3].map((i) => (
-            <Skeleton key={i} className="h-40" style={{ width: size }} />
-          ))}
-        </View>
-      ) : (
-        <FlatList
-          data={filtered}
-          keyExtractor={(item) => item._id}
-          numColumns={2}
-          columnWrapperStyle={{ gap: 10, marginBottom: 10 }}
-          contentContainerStyle={{ paddingBottom: 100 }}
-          showsVerticalScrollIndicator={false}
-          onRefresh={refetch}
-          refreshing={isRefetching}
-          renderItem={({ item }) => (
-            <PhotoCard photo={item} size={size} onPress={() => setViewer(item)} />
-          )}
-          ListEmptyComponent={
-            <EmptyState
-              icon={<CameraOff size={32} color="#9CA3AF" />}
-              title="No photos yet"
-              message="Moments from school life will appear here."
-            />
-          }
-        />
-      )}
+      <DataBoundary
+        query={gallery}
+        skeleton={
+          <View className="flex-row flex-wrap" style={{ gap: GAP }}>
+            {Array.from({ length: columns * 2 }).map((_, i) => (
+              <Skeleton key={i} style={{ width: size, height: size, borderRadius: 18 }} />
+            ))}
+          </View>
+        }
+        empty={{
+          icon: <CameraOff size={32} color={colors.inkFaint} />,
+          title: 'No photos yet',
+          message: 'Moments from school life will appear here.',
+        }}
+      >
+        {() =>
+          filtered.length ? (
+            <View className="flex-row flex-wrap" style={{ gap: GAP }}>
+              {filtered.map((item) => (
+                <PhotoCard key={item._id} photo={item} size={size} onPress={() => setViewer(item)} />
+              ))}
+            </View>
+          ) : (
+            <EmptyState title="Nothing in this category" message="Try another category." />
+          )
+        }
+      </DataBoundary>
 
       {/* Full-screen photo viewer */}
       <Modal visible={!!viewer} animationType="fade" transparent onRequestClose={() => setViewer(null)}>
-        <View className="flex-1 bg-black/90">
-          <View className="flex-row items-center justify-between px-4 pt-14">
-            <Text className="flex-1 text-lg font-bold text-white" numberOfLines={1}>
+        <View className="flex-1 bg-primary-900/95">
+          <View className="flex-row items-center justify-between px-4" style={{ paddingTop: Math.max(insets.top, 16) }}>
+            <Text className="flex-1 font-serif text-[20px] text-white" numberOfLines={1}>
               {viewer?.title}
             </Text>
-            <Pressable onPress={() => setViewer(null)} hitSlop={10} className="p-2">
+            <Pressable
+              onPress={() => setViewer(null)}
+              accessibilityRole="button"
+              accessibilityLabel="Close photo"
+              className="h-11 w-11 items-center justify-center"
+            >
               <X size={24} color="#FFFFFF" />
             </Pressable>
           </View>
           {viewer ? (
             <Image
               source={{ uri: ik(viewer.imageUrl, 'w-1400') }}
-              className="flex-1"
+              style={{ flex: 1 }}
               contentFit="contain"
               transition={250}
+              accessibilityLabel={viewer.title}
             />
           ) : null}
-          <View className="items-center pb-10">
+          <View className="items-center" style={{ paddingBottom: Math.max(insets.bottom, 24) }}>
             {viewer ? (
-              <View className="rounded-full bg-white/10 px-4 py-1">
+              <View className="rounded-full bg-white/15 px-3">
                 <ContentActions
                   itemType="gallery"
                   itemId={viewer._id}

@@ -1,5 +1,6 @@
 import axios from 'axios';
 import { env } from '../config/env';
+import { getNetwork, trackRequestEnd, trackRequestStart } from './network';
 
 export const api = axios.create({
   baseURL: env.apiUrl,
@@ -23,12 +24,22 @@ export function onUnauthorized(handler) {
 api.interceptors.request.use((config) => {
   const token = tokenGetter();
   if (token) config.headers.Authorization = `Bearer ${token}`;
+  // Fail writes fast when we know there is no connection, instead of a 20s hang.
+  if (!getNetwork().online && (config.method || 'get').toLowerCase() !== 'get') {
+    return Promise.reject(Object.assign(new Error('You are offline. Reconnect and try again.'), { isOffline: true }));
+  }
+  config.metadata = { trackId: trackRequestStart() };
   return config;
 });
 
 api.interceptors.response.use(
-  (response) => response,
+  (response) => {
+    trackRequestEnd(response.config?.metadata?.trackId, false, true);
+    return response;
+  },
   (error) => {
+    // No response at all = network failure / timeout (not an HTTP error).
+    trackRequestEnd(error.config?.metadata?.trackId, !error.response && error.code !== 'ERR_CANCELED');
     const status = error.response?.status;
     const url = error.config?.url || '';
     const isAuthAttempt = url.includes('/auth/login') || url.includes('/auth/register');
@@ -39,7 +50,14 @@ api.interceptors.response.use(
   }
 );
 
+/** True when the failure was the network, not the server. */
+export function isNetworkError(error) {
+  return !!error && (error.isOffline || (!error.response && (error.code === 'ERR_NETWORK' || error.code === 'ECONNABORTED' || /network|timeout/i.test(error.message || ''))));
+}
+
 export function apiErrorMessage(error, fallback = 'Something went wrong. Please try again.') {
+  if (error?.isOffline) return error.message;
+  if (isNetworkError(error)) return "Can't reach the server. Check your internet connection and try again.";
   return error?.response?.data?.message || error?.message || fallback;
 }
 

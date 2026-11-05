@@ -1,5 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { api, buildUploadPayload } from '../../services/api';
+import { useInfiniteList } from '../../hooks/useInfiniteList';
 
 const keys = {
   all: ['notices'],
@@ -23,4 +24,17 @@ export function useNotices() {
 
 export function useNotice(id) {
   return useQuery({ queryKey: keys.detail(id), queryFn: () => fetchById(id), enabled: !!id });
+}
+
+/** Small slice for the home screen (one tiny request instead of the whole table). */
+export function useLatestNotices(limit = 5) {
+  return useQuery({
+    queryKey: [...keys.all, 'latest', limit],
+    queryFn: async () => (await api.get('/notices', { params: { status: 'published', limit, page: 1 } })).data,
+  });
+}
+
+/** Lazy-loaded list. Pass `{ status: 'published' }` for the public feed. */
+export function useNoticesInfinite(params = {}) {
+  return useInfiniteList({ key: keys.all, path: '/notices', params });
 }

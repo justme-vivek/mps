@@ -6,6 +6,7 @@ import FavoriteButton from './FavoriteButton';
 import { useAuth } from '../../features/auth/AuthContext';
 import { useToast } from '../ui/Toast';
 import { shareContent } from '../../utils/share';
+import { colors } from '../../theme/tokens';
 
 /**
  * Row of content actions (favourite + share).
@@ -26,10 +27,15 @@ export default function ContentActions({ itemType, itemId, title, shareText }) {
   };
 
   return (
-    <View className="flex-row items-center" style={{ gap: 4 }}>
+    <View className="flex-row items-center">
       <FavoriteButton itemType={itemType} itemId={itemId} size={22} />
-      <Pressable onPress={handleShare} hitSlop={10} className="p-1.5">
-        <Share2 size={20} color="#9CA3AF" />
+      <Pressable
+        onPress={handleShare}
+        accessibilityRole="button"
+        accessibilityLabel="Share"
+        className="h-11 w-11 items-center justify-center"
+      >
+        <Share2 size={20} color={colors.inkFaint} />
       </Pressable>
     </View>
   );

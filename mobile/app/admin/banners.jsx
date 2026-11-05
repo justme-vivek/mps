@@ -1,13 +1,13 @@
 import React, { useState } from 'react';
-import { FlatList, Pressable, Text } from 'react-native';
-import { Plus } from 'lucide-react-native';
+import Text from '../../src/components/ui/Text';
 import Screen from '../../src/components/ui/Screen';
-import Skeleton from '../../src/components/ui/Skeleton';
 import EmptyState from '../../src/components/ui/EmptyState';
 import ConfirmDialog from '../../src/components/ui/ConfirmDialog';
 import Badge from '../../src/components/ui/Badge';
 import Input from '../../src/components/ui/Input';
+import AdminList from '../../src/components/admin/AdminList';
 import EntityCard from '../../src/components/admin/EntityCard';
+import AdminAddFab from '../../src/components/admin/AdminAddFab';
 import FormModal from '../../src/components/admin/FormModal';
 import { Field, SwitchRow } from '../../src/components/admin/Field';
 import ImagePickerField from '../../src/components/admin/ImagePickerField';
@@ -18,7 +18,8 @@ import { useToast } from '../../src/components/ui/Toast';
 const EMPTY = { title: '', subtitle: '', link: '', order: '0', isActive: true, media: { url: null, file: null } };
 
 export default function AdminBanners() {
-  const { data: banners = [], isLoading } = useBanners();
+  const list = useBanners();
+  const banners = list.data || [];
   const { create, update, remove } = useEntityMutations({
     service: bannerService,
     keys: bannerService.keys,
@@ -76,12 +77,10 @@ export default function AdminBanners() {
   };
 
   return (
-    <Screen>
-      <FlatList
-        data={banners || []}
-        keyExtractor={(item) => item._id}
-        contentContainerStyle={{ paddingBottom: 110 }}
-        showsVerticalScrollIndicator={false}
+    <Screen scroll={false} maxWidth={960}>
+      <AdminList
+        list={list}
+        thumb
         renderItem={({ item }) => (
           <EntityCard
             title={item.title}
@@ -93,25 +92,14 @@ export default function AdminBanners() {
             onDelete={() => setDeleting(item)}
           />
         )}
-        ListEmptyComponent={
-          isLoading ? (
-            <Skeleton className="h-24 w-full" />
-          ) : (
-            <EmptyState
+        empty={<EmptyState
               title="No banners yet"
               message="Hero banners appear at the top of the app home screen."
-            />
-          )
-        }
+            />}
       />
 
       {/* Floating add button */}
-      <Pressable
-        onPress={openCreate}
-        className="absolute bottom-8 right-6 h-14 w-14 items-center justify-center rounded-full bg-primary-600 shadow-lg"
-      >
-        <Plus size={26} color="#FFFFFF" />
-      </Pressable>
+      <AdminAddFab label="New banner" onPress={openCreate} />
 
       <FormModal
         visible={modalOpen}

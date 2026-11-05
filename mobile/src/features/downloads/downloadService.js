@@ -1,5 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { api, buildUploadPayload } from '../../services/api';
+import { useInfiniteList } from '../../hooks/useInfiniteList';
 
 const keys = {
   all: ['downloads'],
@@ -27,4 +28,8 @@ export function useIncrementDownload() {
     mutationFn: incrementDownload,
     onSuccess: () => qc.invalidateQueries({ queryKey: keys.all }),
   });
+}
+
+export function useDownloadsInfinite() {
+  return useInfiniteList({ key: keys.all, path: '/downloads' });
 }

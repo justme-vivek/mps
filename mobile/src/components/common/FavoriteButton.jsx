@@ -5,12 +5,13 @@ import { useRouter } from 'expo-router';
 import { useAuth } from '../../features/auth/AuthContext';
 import { useFavoriteIds, useToggleFavorite } from '../../features/favorites/favoriteService';
 import { useToast } from '../ui/Toast';
+import { colors } from '../../theme/tokens';
 
 /**
  * Heart toggle for favouriting content. Requires a logged-in account —
- * guests are prompted to sign in instead.
+ * guests are prompted to sign in instead. 44px tap target.
  */
-export default function FavoriteButton({ itemType, itemId, size = 20 }) {
+export default function FavoriteButton({ itemType, itemId, size = 20, onDark = false }) {
   const { status } = useAuth();
   const router = useRouter();
   const toast = useToast();
@@ -28,13 +29,18 @@ export default function FavoriteButton({ itemType, itemId, size = 20 }) {
     toggle.mutate({ itemType, itemId });
   };
 
+  const idle = onDark ? '#FFFFFF' : colors.inkFaint;
+  const active = onDark ? colors.marker : colors.danger;
+
   return (
-    <Pressable onPress={handlePress} hitSlop={10} className="p-1.5">
-      <Heart
-        size={size}
-        color={isFavorite ? '#DC2626' : '#9CA3AF'}
-        fill={isFavorite ? '#DC2626' : 'transparent'}
-      />
+    <Pressable
+      onPress={handlePress}
+      accessibilityRole="button"
+      accessibilityLabel={isFavorite ? 'Remove from favourites' : 'Save to favourites'}
+      accessibilityState={{ selected: isFavorite }}
+      className="h-11 w-11 items-center justify-center"
+    >
+      <Heart size={size} color={isFavorite ? active : idle} fill={isFavorite ? active : 'transparent'} />
     </Pressable>
   );
 }

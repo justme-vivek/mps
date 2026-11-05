@@ -1,5 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { api, buildUploadPayload } from '../../services/api';
+import { useInfiniteList } from '../../hooks/useInfiniteList';
 
 const keys = {
   all: ['media'],
@@ -22,4 +23,8 @@ export function useMediaMutations() {
   const upload = useMutation({ mutationFn: uploadAsset, onSuccess: done });
   const remove = useMutation({ mutationFn: deleteAsset, onSuccess: done });
   return { upload, remove };
+}
+
+export function useMediaInfinite(type) {
+  return useInfiniteList({ key: keys.all, path: '/media', params: type ? { type } : {}, pageSize: 18 });
 }

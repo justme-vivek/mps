@@ -1,48 +1,46 @@
 import React from 'react';
-import { FlatList, Text } from 'react-native';
 import { useRouter } from 'expo-router';
 import { CalendarX2 } from 'lucide-react-native';
 import Screen from '../../src/components/ui/Screen';
-import Skeleton from '../../src/components/ui/Skeleton';
-import EmptyState from '../../src/components/ui/EmptyState';
+import PageTitle from '../../src/components/ui/PageTitle';
+import DataBoundary from '../../src/components/feedback/DataBoundary';
+import LoadMoreFooter from '../../src/components/feedback/LoadMoreFooter';
+import { DiaryRowSkeleton } from '../../src/components/feedback/skeletons';
 import { EventCard } from '../../src/components/common/ContentCards';
-import { useEvents } from '../../src/features/events/eventService';
+import { useEventsInfinite } from '../../src/features/events/eventService';
+import { colors } from '../../src/theme/tokens';
 
 export default function EventsScreen() {
   const router = useRouter();
-  const { data: events = [], isLoading, refetch, isRefetching } = useEvents();
-
-  const sorted = [...(events || [])].sort((a, b) => new Date(b.date) - new Date(a.date));
+  const list = useEventsInfinite();
 
   return (
-    <Screen>
-      <Text className="mb-3 text-2xl font-black text-ink">Events</Text>
-      {isLoading ? (
-        <View style={{ gap: 12 }}>
-          {[0, 1, 2].map((i) => (
-            <Skeleton key={i} className="h-24 w-full" />
-          ))}
-        </View>
-      ) : (
-        <FlatList
-          data={sorted}
-          keyExtractor={(item) => item._id}
-          renderItem={({ item }) => (
-            <EventCard event={item} onPress={() => router.push(`/events/${item._id}`)} />
-          )}
-          ListEmptyComponent={
-            <EmptyState
-              icon={<CalendarX2 size={32} color="#9CA3AF" />}
-              title="No events yet"
-              message="School events will appear here once scheduled."
-            />
-          }
-          onRefresh={refetch}
-          refreshing={isRefetching}
-          contentContainerStyle={{ paddingBottom: 100 }}
-          showsVerticalScrollIndicator={false}
-        />
-      )}
+    <Screen
+      bottomTabBar
+      maxWidth={880}
+      onEndReached={list.loadMore}
+      refresh={{ refreshing: list.isRefetching && !list.isFetchingNextPage, onRefresh: list.refetch }}
+    >
+      <PageTitle title="Events" subtitle="What is happening at school" />
+
+      <DataBoundary
+        query={list}
+        skeleton={<DiaryRowSkeleton count={4} />}
+        empty={{
+          icon: <CalendarX2 size={32} color={colors.inkFaint} />,
+          title: 'No events yet',
+          message: 'School events will appear here once scheduled.',
+        }}
+      >
+        {(events) => (
+          <>
+            {events.map((item, i) => (
+              <EventCard key={item._id} event={item} first={i === 0} onPress={() => router.push(`/events/${item._id}`)} />
+            ))}
+            <LoadMoreFooter list={list} skeleton={<DiaryRowSkeleton count={2} />} />
+          </>
+        )}
+      </DataBoundary>
     </Screen>
   );
 }

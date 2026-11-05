@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
-import { Text, View } from 'react-native';
+import { View } from 'react-native';
+import Text from '../src/components/ui/Text';
 import { Controller, useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
@@ -66,12 +67,12 @@ export default function NewPassword() {
 
   return (
     <SafeAreaView className="flex-1 bg-surface-alt">
-      <View className="flex-1 justify-center px-6">
+      <View className="w-full flex-1 justify-center self-center px-6" style={{ maxWidth: 480 }}>
         <View className="mb-6 items-center">
           <View className="h-16 w-16 items-center justify-center rounded-full bg-success-50">
-            <CheckCircle2 size={30} color="#16A34A" />
+            <CheckCircle2 size={30} color="#0F6B38" />
           </View>
-          <Text className="mt-3 text-2xl font-black text-ink">Set new password</Text>
+          <Text accessibilityRole="header" className="mt-3 font-serif text-[28px] leading-9 text-ink">Set new password</Text>
           <View className="mt-2">
             <Badge label="EMAIL VERIFIED" tone="success" />
           </View>
@@ -102,6 +103,9 @@ export default function NewPassword() {
               value={value}
               onChangeText={onChange}
               error={error?.message}
+            
+              returnKeyType="go"
+              onSubmitEditing={handleSubmit(onSubmit)}
             />
           )}
         />

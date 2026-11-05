@@ -1,30 +1,44 @@
 import React from 'react';
-import { KeyboardAvoidingView, Modal, Platform, Text, View } from 'react-native';
+import { KeyboardAvoidingView, Modal, Platform, Pressable, View } from 'react-native';
 import { X } from 'lucide-react-native';
-import { Pressable } from 'react-native';
+import Text from '../ui/Text';
 import Button from '../ui/Button';
+import { useBreakpoint } from '../../hooks/useBreakpoint';
+import { colors } from '../../theme/tokens';
 
-/** Bottom-sheet style form modal used by all admin CRUD screens. */
+/**
+ * Form modal used by all admin CRUD screens.
+ * Phones: bottom sheet. Tablets and laptops: centred 560px dialog.
+ */
 export default function FormModal({ visible, title, onClose, onSubmit, submitLabel = 'Save', submitting = false, children }) {
+  const { isMedium, height } = useBreakpoint();
   return (
-    <Modal visible={visible} animationType="slide" transparent onRequestClose={onClose}>
-      <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : undefined} className="flex-1 justify-end bg-black/50">
-        <Pressable className="flex-1" onPress={onClose} />
-        <View className="rounded-t-3xl border-t border-line bg-surface px-5 pb-8 pt-3">
+    <Modal visible={visible} animationType={isMedium ? 'fade' : 'slide'} transparent onRequestClose={onClose}>
+      <KeyboardAvoidingView
+        behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+        className={`flex-1 bg-primary-900/60 ${isMedium ? 'items-center justify-center px-6' : 'justify-end'}`}
+      >
+        {!isMedium ? <Pressable className="flex-1" onPress={onClose} accessibilityLabel="Close form" /> : null}
+        <View
+          className={`w-full border-line bg-surface px-5 pb-6 pt-4 ${
+            isMedium ? 'max-w-[560px] rounded-card border-[1.5px]' : 'rounded-t-[28px] border-t-[1.5px]'
+          }`}
+        >
           <View className="mb-2 flex-row items-center justify-between">
-            <Text className="text-lg font-extrabold text-ink">{title}</Text>
-            <Pressable onPress={onClose} hitSlop={10} className="p-1.5">
-              <X size={22} color="#6B7280" />
+            <Text accessibilityRole="header" className="font-serif text-[22px] text-ink">
+              {title}
+            </Text>
+            <Pressable
+              onPress={onClose}
+              accessibilityRole="button"
+              accessibilityLabel="Close"
+              className="h-11 w-11 items-center justify-center"
+            >
+              <X size={22} color={colors.inkMuted} />
             </Pressable>
           </View>
-          <View style={{ maxHeight: 480 }}>{children}</View>
-          <Button
-            title={submitLabel}
-            onPress={onSubmit}
-            loading={submitting}
-            className="mt-2"
-            size="lg"
-          />
+          <View style={{ maxHeight: Math.min(480, Math.max(240, height - 260)) }}>{children}</View>
+          <Button title={submitLabel} onPress={onSubmit} loading={submitting} className="mt-2" size="lg" />
         </View>
       </KeyboardAvoidingView>
     </Modal>

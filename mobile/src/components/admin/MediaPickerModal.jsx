@@ -1,15 +1,20 @@
-import React from 'react';
-import { FlatList, Image, Modal, Pressable, Text, View } from 'react-native';
+import React, { useState } from 'react';
+import { Modal, Pressable, View } from 'react-native';
+import { Image } from 'expo-image';
 import { FileText, Trash2 } from 'lucide-react-native';
+import Text from '../ui/Text';
 import { useMediaAssets, useMediaMutations } from '../../features/media/mediaService';
 import { ik } from '../../utils/ik';
 import { formatBytes } from '../../utils/format';
 import EmptyState from '../ui/EmptyState';
 import Skeleton from '../ui/Skeleton';
 import ConfirmDialog from '../ui/ConfirmDialog';
+import { useBreakpoint } from '../../hooks/useBreakpoint';
+import { colors } from '../../theme/tokens';
 
 /** Admin media library picker — choose (or delete) an already-uploaded asset. */
 export default function MediaPickerModal({ visible, type = 'image', onClose, onSelect }) {
+  const { isMedium } = useBreakpoint();
   const { data: assets = [], isLoading } = useMediaAssets(visible ? type : undefined);
   const { remove } = useMediaMutations();
   const [deleting, setDeleting] = useState(null);
@@ -21,23 +26,25 @@ export default function MediaPickerModal({ visible, type = 'image', onClose, onS
   };
 
   return (
-    <Modal visible={visible} animationType="slide" transparent onRequestClose={onClose}>
-      <View className="flex-1 justify-end bg-black/50">
-        <Pressable className="flex-1" onPress={onClose} />
-        <View className="h-[65%] rounded-t-3xl border-t border-line bg-surface px-5 pb-8 pt-3">
+    <Modal visible={visible} animationType={isMedium ? 'fade' : 'slide'} transparent onRequestClose={onClose}>
+      <View className={`flex-1 bg-primary-900/60 ${isMedium ? 'items-center justify-center px-6' : 'justify-end'}`}>
+        {!isMedium ? <Pressable className="flex-1" onPress={onClose} accessibilityLabel="Close library" /> : null}
+        <View
+          className={`w-full border-line bg-surface px-5 pb-6 pt-4 ${
+            isMedium ? 'h-[70%] max-w-[640px] rounded-card border-[1.5px]' : 'h-[70%] rounded-t-[28px] border-t-[1.5px]'
+          }`}
+        >
           <View className="mb-3 flex-row items-center justify-between">
-            <Text className="text-lg font-extrabold text-ink">
-              Media library{type === 'pdf' ? ' (PDF)' : ''}
-            </Text>
-            <Pressable onPress={onClose} className="p-1">
-              <Text className="text-[13px] font-bold text-primary-600">Done</Text>
+            <Text className="font-serif text-[22px] text-ink">Media library{type === 'pdf' ? ' (PDF)' : ''}</Text>
+            <Pressable onPress={onClose} accessibilityRole="button" className="min-h-[44px] justify-center px-2">
+              <Text className="text-[15px] font-bold text-primary">Done</Text>
             </Pressable>
           </View>
 
           {isLoading ? (
             <View className="flex-row flex-wrap" style={{ gap: 10 }}>
               {[0, 1, 2, 3, 4, 5].map((i) => (
-                <Skeleton key={i} className="h-24" style={{ width: 96 }} />
+                <Skeleton key={i} style={{ width: 96, height: 96 }} />
               ))}
             </View>
           ) : assets.length === 0 ? (
@@ -50,42 +57,53 @@ export default function MediaPickerModal({ visible, type = 'image', onClose, onS
               }
             />
           ) : (
-            <FlatList
-              data={assets}
-              keyExtractor={(item) => item._id}
-              numColumns={3}
-              columnWrapperStyle={{ gap: 10, marginBottom: 10 }}
-              contentContainerStyle={{ paddingBottom: 20 }}
-              renderItem={({ item }) => (
-                <View className="flex-1 overflow-hidden rounded-xl border border-line bg-surface-alt">
-                  <Pressable onPress={() => onSelect(item)}>
-                    {item.type === 'image' ? (
-                      <Image
-                        source={{ uri: ik(item.url, 'w-300,q-70') }}
-                        className="h-24 w-full"
-                        contentFit="cover"
-                        transition={150}
-                      />
-                    ) : (
-                      <View className="h-24 items-center justify-center">
-                        <FileText size={26} color="#DC2626" />
-                        <Text className="mt-1 px-1 text-[10px] font-semibold text-ink-soft" numberOfLines={1}>
-                          {item.name}
-                        </Text>
-                      </View>
-                    )}
-                  </Pressable>
-                  <View className="flex-row items-center justify-between px-1.5 py-1">
-                    <Text className="flex-1 text-[10px] text-ink-faint" numberOfLines={1}>
-                      {formatBytes(item.size)}
-                    </Text>
-                    <Pressable onPress={() => setDeleting(item)} hitSlop={6} className="p-1">
-                      <Trash2 size={14} color="#DC2626" />
+            <View className="flex-1 overflow-hidden">
+              <View className="flex-row flex-wrap" style={{ gap: 10 }}>
+                {assets.map((item) => (
+                  <View
+                    key={item._id}
+                    className="overflow-hidden rounded-xl border-[1.5px] border-line bg-surface-alt"
+                    style={{ width: isMedium ? 130 : 100 }}
+                  >
+                    <Pressable
+                      onPress={() => onSelect(item)}
+                      accessibilityRole="button"
+                      accessibilityLabel={`Use ${item.name}`}
+                    >
+                      {item.type === 'image' ? (
+                        <Image
+                          source={{ uri: ik(item.url, 'w-300,q-70') }}
+                          style={{ width: '100%', height: 96 }}
+                          contentFit="cover"
+                          transition={150}
+                          accessibilityLabel={item.name}
+                        />
+                      ) : (
+                        <View className="h-24 items-center justify-center">
+                          <FileText size={26} color={colors.pen} />
+                          <Text className="mt-1 px-1 text-[12px] text-ink-soft" numberOfLines={1}>
+                            {item.name}
+                          </Text>
+                        </View>
+                      )}
                     </Pressable>
+                    <View className="flex-row items-center justify-between pl-2">
+                      <Text className="flex-1 text-[12px] text-ink-faint" numberOfLines={1}>
+                        {formatBytes(item.size)}
+                      </Text>
+                      <Pressable
+                        onPress={() => setDeleting(item)}
+                        accessibilityRole="button"
+                        accessibilityLabel={`Delete ${item.name}`}
+                        className="h-11 w-11 items-center justify-center"
+                      >
+                        <Trash2 size={16} color={colors.danger} />
+                      </Pressable>
+                    </View>
                   </View>
-                </View>
-              )}
-            />
+                ))}
+              </View>
+            </View>
           )}
         </View>
       </View>

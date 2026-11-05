@@ -1,3 +1,14 @@
+/**
+ * "Diary" design system for MPS.
+ * Token names are unchanged from the original theme so every screen picks up
+ * the new look; only the values and font families are new.
+ *
+ *  paper   #F8FAFF   page background          (surface-alt)
+ *  ink     #1B2A59   text, headers, hero      (ink / primary-700)
+ *  pen     #2A44B8   links, primary buttons   (primary)
+ *  margin  #D8432F   the red margin line only (margin)
+ *  marker  #FFE066   highlighter for "new"    (accent)
+ */
 /** @type {import('tailwindcss').Config} */
 module.exports = {
   content: ['./app/**/*.{js,jsx}', './src/**/*.{js,jsx}'],
@@ -6,40 +17,52 @@ module.exports = {
     extend: {
       colors: {
         primary: {
-          50: '#EEF2FF',
-          100: '#E0E7FF',
-          200: '#C7D2FE',
-          500: '#6366F1',
-          600: '#4F46E5',
-          700: '#4338CA',
-          900: '#312E81',
-          DEFAULT: '#4F46E5',
+          50: '#EDF1FF',
+          100: '#DCE4F8',
+          200: '#C9D3F0',
+          500: '#4A63D0',
+          600: '#2A44B8',
+          700: '#1B2A59',
+          900: '#111B3D',
+          DEFAULT: '#2A44B8',
         },
         accent: {
-          DEFAULT: '#F59E0B',
-          50: '#FFFBEB',
-          100: '#FEF3C7',
+          DEFAULT: '#FFE066',
+          50: '#FFF8D6',
+          100: '#FFF1BF',
+          ink: '#6B4E00',
         },
         danger: {
-          DEFAULT: '#DC2626',
-          50: '#FEF2F2',
+          DEFAULT: '#B7311F',
+          50: '#FDEDEA',
         },
         success: {
-          DEFAULT: '#16A34A',
-          50: '#F0FDF4',
+          DEFAULT: '#0F6B38',
+          50: '#DDF3E6',
         },
+        margin: '#D8432F',
         ink: {
-          DEFAULT: '#111827',
-          soft: '#374151',
-          muted: '#6B7280',
-          faint: '#9CA3AF',
+          DEFAULT: '#1B2A59',
+          soft: '#2F3F70',
+          muted: '#4A5A8A',
+          faint: '#56648F',
         },
         surface: {
           DEFAULT: '#FFFFFF',
-          alt: '#F9FAFB',
-          sunken: '#F3F4F6',
+          alt: '#F8FAFF',
+          sunken: '#EDF1FB',
         },
-        line: '#E5E7EB',
+        line: '#C9D3F0',
+      },
+      fontFamily: {
+        // Native custom fonts have one family name per weight.
+        sans: ['AtkinsonHyperlegible_400Regular'],
+        'sans-bold': ['AtkinsonHyperlegible_700Bold'],
+        serif: ['YoungSerif_400Regular'],
+      },
+      borderRadius: {
+        card: '20px',
+        hero: '28px',
       },
     },
   },

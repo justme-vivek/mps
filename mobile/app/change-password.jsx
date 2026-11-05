@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
-import { Pressable, Text, View } from 'react-native';
+import { Pressable, View } from 'react-native';
+import Text from '../src/components/ui/Text';
 import { Controller, useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
@@ -64,16 +65,16 @@ export default function ChangePassword() {
 
   return (
     <SafeAreaView className="flex-1 bg-surface-alt">
-      <View className="flex-1 px-6">
+      <View className="w-full flex-1 self-center px-6" style={{ maxWidth: 480 }}>
         <Pressable
           onPress={() => router.back()}
           hitSlop={8}
-          className="mt-2 h-10 w-10 items-center justify-center rounded-full bg-surface"
+          className="mt-2 h-11 w-11 items-center justify-center rounded-full border-[1.5px] border-line bg-surface"
         >
-          <ChevronLeft size={22} color="#111827" />
+          <ChevronLeft size={22} color="#1B2A59" />
         </Pressable>
 
-        <Text className="mt-6 text-2xl font-black text-ink">Change password</Text>
+        <Text accessibilityRole="header" className="mt-6 font-serif text-[28px] leading-9 text-ink">Change password</Text>
         <Text className="mt-1 text-[14px] text-ink-muted">
           We'll email a 6-digit code to <Text className="font-bold text-ink">{user.email}</Text> to confirm.
         </Text>
@@ -104,7 +105,10 @@ export default function ChangePassword() {
                 value={value}
                 onChangeText={onChange}
                 error={error?.message}
-              />
+              
+              returnKeyType="go"
+              onSubmitEditing={handleSubmit(onSubmit)}
+            />
             )}
           />
           <Button title="Continue" size="lg" className="mt-2" loading={isSubmitting} onPress={handleSubmit(onSubmit)} />

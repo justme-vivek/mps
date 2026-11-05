@@ -1,4 +1,5 @@
 const Download = require('../models/Download');
+const { findPaged } = require('../utils/paginate');
 const { uploadToImagekit, deleteFromImagekit } = require('../utils/media');
 
 // @desc    List downloadable PDFs
@@ -6,7 +7,7 @@ const { uploadToImagekit, deleteFromImagekit } = require('../utils/media');
 // @access  Public
 const getDownloads = async (req, res) => {
   try {
-    const downloads = await Download.find({}).sort({ order: 1, createdAt: -1 });
+    const downloads = await findPaged(Download, {}, { order: 1, createdAt: -1, _id: -1 }, req, res);
     res.json(downloads);
   } catch (error) {
     res.status(500).json({ message: 'Server Error', error: error.message });

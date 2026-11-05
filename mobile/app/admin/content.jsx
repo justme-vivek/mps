@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
-import { FlatList, Text, View } from 'react-native';
+import { FlatList, View } from 'react-native';
+import Text from '../../src/components/ui/Text';
 import Screen from '../../src/components/ui/Screen';
+import PageTitle from '../../src/components/ui/PageTitle';
 import Skeleton from '../../src/components/ui/Skeleton';
 import ListRow from '../../src/components/ui/ListRow';
 import Input from '../../src/components/ui/Input';
@@ -54,15 +56,14 @@ export default function AdminContent() {
   const activeTitle = SECTIONS.find((s) => s.id === activeId)?.title;
 
   return (
-    <Screen>
-      <Text className="mb-1 text-2xl font-black text-ink">Website Content</Text>
-      <Text className="mb-4 text-[13px] text-ink-muted">
-        Edit the text blocks shown across the app.
-      </Text>
+    <Screen scroll={false} maxWidth={760}>
+      <PageTitle title="Website content" subtitle="Edit the text blocks shown across the app." />
 
       <FlatList
+        style={{ flex: 1 }}
         data={SECTIONS}
         keyExtractor={(item) => item.id}
+        style={{ flex: 1 }}
         contentContainerStyle={{ paddingBottom: 60 }}
         showsVerticalScrollIndicator={false}
         renderItem={({ item }) => (

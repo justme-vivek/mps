@@ -1,17 +1,17 @@
 import React, { useState } from 'react';
-import { FlatList, Pressable, Text } from 'react-native';
-import { Plus } from 'lucide-react-native';
+import Text from '../../src/components/ui/Text';
 import Screen from '../../src/components/ui/Screen';
-import Skeleton from '../../src/components/ui/Skeleton';
 import EmptyState from '../../src/components/ui/EmptyState';
 import ConfirmDialog from '../../src/components/ui/ConfirmDialog';
 import Badge from '../../src/components/ui/Badge';
 import Input from '../../src/components/ui/Input';
+import AdminList from '../../src/components/admin/AdminList';
 import EntityCard from '../../src/components/admin/EntityCard';
+import AdminAddFab from '../../src/components/admin/AdminAddFab';
 import FormModal from '../../src/components/admin/FormModal';
 import { Field, SwitchRow } from '../../src/components/admin/Field';
 import PdfPickerField from '../../src/components/admin/PdfPickerField';
-import { useNotices, noticeService } from '../../src/features/notices/noticeService';
+import { useNoticesInfinite, noticeService } from '../../src/features/notices/noticeService';
 import { useEntityMutations } from '../../src/hooks/useEntityMutations';
 import { useToast } from '../../src/components/ui/Toast';
 import { toDateInput } from '../../src/utils/format';
@@ -27,7 +27,8 @@ const EMPTY = {
 };
 
 export default function AdminNotices() {
-  const { data: notices = [], isLoading } = useNotices();
+  const list = useNoticesInfinite();
+  const notices = list.data || [];
   const { create, update, remove } = useEntityMutations({
     service: noticeService,
     keys: noticeService.keys,
@@ -82,12 +83,9 @@ export default function AdminNotices() {
   };
 
   return (
-    <Screen>
-      <FlatList
-        data={notices || []}
-        keyExtractor={(item) => item._id}
-        contentContainerStyle={{ paddingBottom: 110 }}
-        showsVerticalScrollIndicator={false}
+    <Screen scroll={false} maxWidth={960}>
+      <AdminList
+        list={list}
         renderItem={({ item }) => (
           <EntityCard
             title={item.title}
@@ -104,21 +102,10 @@ export default function AdminNotices() {
             onDelete={() => setDeleting(item)}
           />
         )}
-        ListEmptyComponent={
-          isLoading ? (
-            <Skeleton className="h-24 w-full" />
-          ) : (
-            <EmptyState title="No notices yet" message="Tap + to publish your first notice." />
-          )
-        }
+        empty={<EmptyState title="No notices yet" message="Tap + to publish your first notice." />}
       />
 
-      <Pressable
-        onPress={openCreate}
-        className="absolute bottom-8 right-6 h-14 w-14 items-center justify-center rounded-full bg-primary-600 shadow-lg"
-      >
-        <Plus size={26} color="#FFFFFF" />
-      </Pressable>
+      <AdminAddFab label="New notice" onPress={openCreate} />
 
       <FormModal
         visible={modalOpen}

@@ -1,4 +1,5 @@
 const Notice = require('../models/Notice');
+const { findPaged } = require('../utils/paginate');
 const { uploadToImagekit, deleteFromImagekit } = require('../utils/media');
 
 // @desc    Fetch all notices
@@ -6,7 +7,7 @@ const { uploadToImagekit, deleteFromImagekit } = require('../utils/media');
 // @access  Public
 const getNotices = async (req, res) => {
   try {
-    const notices = await Notice.find({}).sort({ isPinned: -1, date: -1 });
+    const notices = await findPaged(Notice, ['draft', 'published'].includes(req.query.status) ? { status: req.query.status } : {}, { isPinned: -1, date: -1, _id: -1 }, req, res);
     res.json(notices);
   } catch (error) {
     res.status(500).json({ message: 'Server Error', error: error.message });
